@@ -70,6 +70,10 @@ export default function SettingsPage() {
         if (!user) return;
         setSavingProfile(true);
         try {
+            const schoolDocRef = doc(db, "schools", user.uid);
+            await updateDoc(schoolDocRef, {
+                subdomain: schoolProfile.subdomain
+            });
             // Note: In a real app, logo/banner would upload to Firebase Storage
             // and we'd save the URL here. We are skipping that for now.
             toast({ title: "Success", description: "Profile settings saved. (Image uploads not implemented)" });
@@ -97,6 +101,14 @@ export default function SettingsPage() {
         }
     };
 
+    const handleSubdomainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newSubdomain = e.target.value
+          .toLowerCase()
+          .replace(/[^a-z0-9-]/g, "")
+          .slice(0, 30);
+        setSchoolProfile(prev => ({...prev, subdomain: newSubdomain}));
+    }
+
 
   return (
     <div>
@@ -111,12 +123,16 @@ export default function SettingsPage() {
                 <CardHeader>
                     <CardTitle>School Profile</CardTitle>
                     <CardDescription>
-                        Update your school's public information.
+                        Update your school's public information and URL.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                  {loading ? (
                     <div className="space-y-6">
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
                         <div className="space-y-2">
                             <Skeleton className="h-4 w-24" />
                             <Skeleton className="h-10 w-full" />
@@ -130,7 +146,19 @@ export default function SettingsPage() {
                         <Label htmlFor="school-name">School Name</Label>
                         <Input id="school-name" value={schoolProfile.name} readOnly />
                         <p className="text-sm text-muted-foreground">
-                        Your subdomain is <span className='font-semibold text-primary'>{schoolProfile.subdomain}</span>.schoolsaas.app
+                            School name cannot be changed after registration.
+                        </p>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="school-subdomain">School URL</Label>
+                        <div className="flex items-center">
+                            <Input id="school-subdomain" value={schoolProfile.subdomain} onChange={handleSubdomainChange} className="rounded-r-none focus:z-10" />
+                            <span className="inline-flex items-center rounded-r-md border border-l-0 border-input bg-secondary px-3 text-sm text-muted-foreground">
+                                .schoolsaas.app
+                            </span>
+                        </div>
+                         <p className="text-sm text-muted-foreground">
+                            This is your school's unique web address.
                         </p>
                     </div>
                     <FileUpload id="school-logo" label="School Logo" />

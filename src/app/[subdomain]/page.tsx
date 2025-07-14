@@ -26,12 +26,10 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
   
   useEffect(() => {
     async function fetchSchoolData() {
-      // The parameter is now `schoolId` based on the file name [schoolId]/page.tsx
       if (!params.subdomain) return;
 
       try {
         setLoading(true);
-        // The API route is /api/schools/[subdomain]
         const response = await fetch(`/api/schools/${params.subdomain}`);
         if (!response.ok) {
           throw new Error('School not found');

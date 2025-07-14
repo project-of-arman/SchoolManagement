@@ -19,6 +19,7 @@ interface SchoolData {
 }
 
 export default function SchoolLandingPage({ params }: { params: { subdomain: string } }) {
+  const { subdomain } = params;
   const [school, setSchool] = useState<SchoolData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +29,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
     setYear(new Date().getFullYear());
 
     async function fetchSchoolData() {
-      if (!params.subdomain) {
+      if (!subdomain) {
         setLoading(false);
         setError("No subdomain provided.");
         return;
@@ -36,7 +37,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
 
       try {
         setLoading(true);
-        const response = await fetch(`/api/schools/${params.subdomain}`);
+        const response = await fetch(`/api/schools/${subdomain}`);
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('School not found');
@@ -53,7 +54,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
     }
 
     fetchSchoolData();
-  }, [params.subdomain]);
+  }, [subdomain]);
 
   if (loading) {
     return (
@@ -100,6 +101,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
                 fill
                 className="object-cover brightness-50"
                 data-ai-hint="school building"
+                priority
             />
             <div className="relative z-10 p-4">
                  <div className="mx-auto mb-4 h-24 w-24 rounded-full bg-white/90 p-2 shadow-lg ring-4 ring-primary">
@@ -124,7 +126,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
             </p>
             <div className="mt-8 flex justify-center gap-4">
                 <Button size="lg" asChild>
-                    <Link href={`/${params.subdomain}/apply`}>Apply Now</Link>
+                    <Link href={`/${subdomain}/apply`}>Apply Now</Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
                      <Link href="/login">School Login</Link>

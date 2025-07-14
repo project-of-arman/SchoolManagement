@@ -71,6 +71,7 @@ interface Student {
   religion: string;
   mobileNumber: string;
   admissionDate: any;
+  photoUrl?: string;
   bloodGroup: string;
   
   fatherName: string;
@@ -103,6 +104,7 @@ const initialStudentState: Student = {
     religion: '',
     mobileNumber: '',
     admissionDate: null,
+    photoUrl: '',
     bloodGroup: '',
     fatherName: '',
     fatherPhone: '',
@@ -287,6 +289,10 @@ export default function StudentsPage() {
       }
   }
 
+  const handlePhotoUpload = (url: string) => {
+    setStudentFormData(prev => ({ ...prev, photoUrl: url }));
+  }
+
   const handleGuardianRadioChange = (value: 'father' | 'mother' | 'other') => {
     setStudentFormData(prev => {
         const newFormData = {...prev, guardianIs: value};
@@ -375,7 +381,14 @@ export default function StudentsPage() {
                                 </Popover>
                             </div>
                             <div className="space-y-2"><Label>Blood Group</Label><Input id="bloodGroup" value={studentFormData.bloodGroup} onChange={handleInputChange} /></div>
-                            <div className="md:col-span-3"><FileUpload id="student-photo" label="Student Photo" /></div>
+                            <div className="md:col-span-3">
+                                <FileUpload 
+                                    id="student-photo" 
+                                    label="Student Photo" 
+                                    onUploadComplete={handlePhotoUpload} 
+                                    initialUrl={studentFormData.photoUrl}
+                                />
+                            </div>
                         </div>
                     </TabsContent>
                     <TabsContent value="guardian-details">

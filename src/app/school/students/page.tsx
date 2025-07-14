@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, MoreHorizontal, Trash2, CalendarIcon, Loader2 } from "lucide-react";
+import { PlusCircle, MoreHorizontal, Trash2, CalendarIcon, Loader2, Eye } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -56,6 +56,7 @@ import { FileUpload } from "@/components/file-upload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 
 interface Student {
   id: string;
@@ -123,6 +124,7 @@ export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [studentFormData, setStudentFormData] = useState<Student>(initialStudentState);
   const [isStudentDialogOpen, setIsStudentDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -260,6 +262,11 @@ export default function StudentsPage() {
     setIsStudentDialogOpen(true);
   }
 
+  const openViewDialog = (student: Student) => {
+    setSelectedStudent(student);
+    setIsViewDialogOpen(true);
+  }
+
   const openDeleteDialog = (student: Student) => {
     setSelectedStudent(student);
     setIsDeleteDialogOpen(true);
@@ -303,6 +310,13 @@ export default function StudentsPage() {
     })
   }
 
+  const DetailRow = ({ label, value }: { label: string, value: string | undefined | null }) => (
+    <div>
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="font-medium">{value || 'N/A'}</p>
+    </div>
+  )
+
 
   return (
     <div>
@@ -316,6 +330,7 @@ export default function StudentsPage() {
         </Button>
       </PageHeader>
       
+      {/* Add/Edit Dialog */}
       <Dialog open={isStudentDialogOpen} onOpenChange={setIsStudentDialogOpen}>
           <DialogContent className="max-w-4xl">
               <form onSubmit={handleFormSubmit}>
@@ -368,7 +383,7 @@ export default function StudentsPage() {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-md">
                                 <h3 className="md:col-span-3 font-semibold">Father's Details</h3>
                                 <div className="space-y-2"><Label>Father Name</Label><Input id="fatherName" value={studentFormData.fatherName} onChange={handleInputChange} /></div>
-                                <div className="space-y-2"><Label>Father Phone</Label><Input id="fatherPhone" type="tel" value={studentFormData.fatherPhone} onChange={handleInputChange} /></div>
+                                <div className="space-y-2"><Label>Father Phone</Label><Input id="fatherPhone" type="tel" value={studentFormData.fatherPhone} onChange={handleInputChange}/></div>
                                 <div className="space-y-2"><Label>Father Occupation</Label><Input id="fatherOccupation" value={studentFormData.fatherOccupation} onChange={handleInputChange} /></div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-md">
@@ -419,6 +434,75 @@ export default function StudentsPage() {
               </form>
           </DialogContent>
       </Dialog>
+      
+       {/* View Details Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Student Profile</DialogTitle>
+            <DialogDescription>
+              Full details for {selectedStudent?.firstName} {selectedStudent?.lastName}.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedStudent && (
+            <div className="max-h-[70vh] overflow-y-auto p-1 pr-4 space-y-6">
+                
+                {/* Student Details Section */}
+                <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">Student Details</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 border p-4 rounded-lg">
+                        <DetailRow label="Full Name" value={`${selectedStudent.firstName} ${selectedStudent.lastName}`} />
+                        <DetailRow label="Admission No" value={selectedStudent.admissionNo} />
+                        <DetailRow label="Class" value={`${selectedStudent.className} (Section: ${selectedStudent.section || 'N/A'})`} />
+                        <DetailRow label="Roll Number" value={selectedStudent.rollNumber} />
+                        <DetailRow label="Gender" value={selectedStudent.gender} />
+                        <DetailRow label="Date of Birth" value={selectedStudent.dateOfBirth ? format(new Date(selectedStudent.dateOfBirth), "PPP") : 'N/A'} />
+                        <DetailRow label="Admission Date" value={selectedStudent.admissionDate ? format(new Date(selectedStudent.admissionDate), "PPP") : 'N/A'} />
+                        <DetailRow label="Mobile Number" value={selectedStudent.mobileNumber} />
+                        <DetailRow label="Religion" value={selectedStudent.religion} />
+                        <DetailRow label="Blood Group" value={selectedStudent.bloodGroup} />
+                    </div>
+                </div>
+
+                {/* Parent/Guardian Details Section */}
+                 <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">Parent & Guardian Details</h3>
+                    <div className="space-y-4 border p-4 rounded-lg">
+                        <h4 className="font-medium">Father's Information</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <DetailRow label="Father's Name" value={selectedStudent.fatherName} />
+                            <DetailRow label="Father's Phone" value={selectedStudent.fatherPhone} />
+                            <DetailRow label="Father's Occupation" value={selectedStudent.fatherOccupation} />
+                        </div>
+                        <Separator />
+                        <h4 className="font-medium">Mother's Information</h4>
+                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <DetailRow label="Mother's Name" value={selectedStudent.motherName} />
+                            <DetailRow label="Mother's Phone" value={selectedStudent.motherPhone} />
+                            <DetailRow label="Mother's Occupation" value={selectedStudent.motherOccupation} />
+                        </div>
+                        <Separator />
+                        <h4 className="font-medium">Guardian Information</h4>
+                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <DetailRow label="Guardian's Name" value={selectedStudent.guardianName} />
+                            <DetailRow label="Guardian's Relation" value={selectedStudent.guardianRelation} />
+                            <DetailRow label="Guardian's Phone" value={selectedStudent.guardianPhone} />
+                            <div className="md:col-span-3">
+                                <DetailRow label="Guardian's Address" value={selectedStudent.guardianAddress} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          )}
+           <DialogFooter>
+                <Button variant="outline" onClick={() => {
+                    setIsViewDialogOpen(false);
+                    setSelectedStudent(null);
+                }}>Close</Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
 
       <div className="rounded-lg border shadow-sm">
@@ -462,6 +546,10 @@ export default function StudentsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => openViewDialog(student)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => openEditDialog(student)}>Edit</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => toggleStudentStatus(student)}>
                             {student.status === 'Active' ? 'Set as Inactive' : 'Set as Active'}
@@ -501,3 +589,5 @@ export default function StudentsPage() {
     </div>
   );
 }
+
+    

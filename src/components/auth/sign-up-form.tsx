@@ -25,6 +25,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { auth, db } from "@/lib/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const formSchema = z.object({
   schoolName: z
@@ -61,15 +64,42 @@ export function SignUpForm() {
     setSubdomain(generatedSubdomain);
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({ ...values, subdomain });
-    // Here you would handle user registration and subdomain creation
-    // For demonstration, we'll just show a success toast and redirect
-    toast({
-      title: "Registration Successful",
-      description: "Your school has been created. Redirecting to dashboard...",
-    });
-    router.push("/dashboard");
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!subdomain) {
+      toast({
+        title: "Error",
+        description: "School name is required to generate a subdomain.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      // Create school document in Firestore
+      await setDoc(doc(db, "schools", user.uid), {
+        name: values.schoolName,
+        ownerId: user.uid,
+        ownerEmail: values.email,
+        subdomain: subdomain,
+        createdAt: serverTimestamp(),
+      });
+      
+      toast({
+        title: "Registration Successful",
+        description: "Your school has been created. Redirecting to dashboard...",
+      });
+      router.push("/dashboard");
+
+    } catch (error: any) {
+       console.error("Sign up failed", error);
+       toast({
+        title: "Sign Up Failed",
+        description: error.message || "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
@@ -137,8 +167,8 @@ export function SignUpForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Create School
+            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? "Creating School..." : "Create School" }
             </Button>
           </form>
         </Form>

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, MoreHorizontal, Trash2, CalendarIcon, Loader2, Eye } from "lucide-react";
@@ -57,6 +58,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Student {
   id: string;
@@ -208,7 +210,9 @@ export default function StudentsPage() {
         const studentDoc = doc(db, "schools", currentUser.uid, "students", studentFormData.id);
         const { id, ...studentDataToUpdate } = studentFormData; 
 
-        await updateDoc(studentDoc, studentDataToUpdate);
+        await updateDoc(studentDoc, {
+          ...studentDataToUpdate
+        });
         toast({ title: "Success", description: "Student details updated." });
         setIsStudentDialogOpen(false);
         setStudentFormData(initialStudentState);
@@ -460,14 +464,23 @@ export default function StudentsPage() {
           {selectedStudent && (
             <div className="max-h-[70vh] overflow-y-auto p-1 pr-4 space-y-6">
                 
+                {/* Profile Header */}
+                <div className="flex flex-col sm:flex-row items-center gap-6 p-4 border rounded-lg bg-secondary/30">
+                    <Avatar className="w-24 h-24 border-2 border-primary">
+                        <AvatarImage src={selectedStudent.photoUrl || "https://placehold.co/100x100.png"} alt={`${selectedStudent.firstName} ${selectedStudent.lastName}`} data-ai-hint="person student" />
+                        <AvatarFallback>{selectedStudent.firstName?.[0]}{selectedStudent.lastName?.[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="space-y-1 text-center sm:text-left">
+                        <h2 className="text-2xl font-bold">{selectedStudent.firstName} {selectedStudent.lastName}</h2>
+                        <p className="text-muted-foreground">Admission No: {selectedStudent.admissionNo || 'N/A'}</p>
+                        <p className="text-muted-foreground">Class: {selectedStudent.className} | Roll: {selectedStudent.rollNumber}</p>
+                    </div>
+                </div>
+
                 {/* Student Details Section */}
                 <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Student Details</h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 border p-4 rounded-lg">
-                        <DetailRow label="Full Name" value={`${selectedStudent.firstName} ${selectedStudent.lastName}`} />
-                        <DetailRow label="Admission No" value={selectedStudent.admissionNo} />
-                        <DetailRow label="Class" value={`${selectedStudent.className} (Section: ${selectedStudent.section || 'N/A'})`} />
-                        <DetailRow label="Roll Number" value={selectedStudent.rollNumber} />
                         <DetailRow label="Gender" value={selectedStudent.gender} />
                         <DetailRow label="Date of Birth" value={selectedStudent.dateOfBirth ? format(new Date(selectedStudent.dateOfBirth), "PPP") : 'N/A'} />
                         <DetailRow label="Admission Date" value={selectedStudent.admissionDate ? format(new Date(selectedStudent.admissionDate), "PPP") : 'N/A'} />

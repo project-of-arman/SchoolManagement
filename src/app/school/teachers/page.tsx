@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, MoreHorizontal } from "lucide-react";
+import { PlusCircle, MoreHorizontal, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -19,7 +20,18 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import {
     Dialog,
     DialogContent,
@@ -32,9 +44,10 @@ import {
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { db, auth } from "@/lib/firebase";
-import { collection, addDoc, getDocs, doc, updateDoc, onSnapshot, query, where } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, onSnapshot, deleteDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { onAuthStateChanged } from "firebase/auth";
+import { useAuth } from "@/hooks/use-auth";
+
 
 interface Teacher {
   id: string;
@@ -49,17 +62,12 @@ export default function TeachersPage() {
   const [newTeacherName, setNewTeacherName] = useState("");
   const [newTeacherEmail, setNewTeacherEmail] = useState("");
   const [newTeacherSubject, setNewTeacherSubject] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState(auth.currentUser);
+  const { user: currentUser } = useAuth();
   const { toast } = useToast();
-
-   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
-    return () => unsubscribe();
-  }, []);
 
   useEffect(() => {
     if (currentUser) {
@@ -99,7 +107,7 @@ export default function TeachersPage() {
       setNewTeacherName("");
       setNewTeacherEmail("");
       setNewTeacherSubject("");
-      setIsDialogOpen(false);
+      setIsAddDialogOpen(false);
     } catch (error) {
       console.error("Error adding teacher: ", error);
       toast({ title: "Error", description: "Could not add teacher.", variant: "destructive" });
@@ -119,13 +127,33 @@ export default function TeachersPage() {
     }
   }
 
+  const handleDeleteTeacher = async () => {
+    if (!selectedTeacher || !currentUser) return;
+    try {
+        const teacherDoc = doc(db, "schools", currentUser.uid, "teachers", selectedTeacher.id);
+        await deleteDoc(teacherDoc);
+        toast({ title: "Success", description: "Teacher removed successfully." });
+    } catch (error) {
+        console.error("Error removing teacher: ", error);
+        toast({ title: "Error", description: "Could not remove teacher.", variant: "destructive" });
+    } finally {
+        setIsDeleteDialogOpen(false);
+        setSelectedTeacher(null);
+    }
+  }
+
+  const openDeleteDialog = (teacher: Teacher) => {
+    setSelectedTeacher(teacher);
+    setIsDeleteDialogOpen(true);
+  }
+
   return (
     <div>
       <PageHeader
         title="Teacher Management"
         description="Add, view, and manage your school's teaching staff."
       >
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
                 <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
@@ -207,9 +235,14 @@ export default function TeachersPage() {
                         <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>View Payments</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => toggleTeacherStatus(teacher)}>
                             {teacher.status === 'Active' ? 'Set as Inactive' : 'Set as Active'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>View Payments</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive" onClick={() => openDeleteDialog(teacher)}>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
                         </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -220,6 +253,24 @@ export default function TeachersPage() {
           </TableBody>
         </Table>
       </div>
+
+       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently remove the teacher
+              &quot;{selectedTeacher?.name}&quot; from your school.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedTeacher(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTeacher} className="bg-destructive hover:bg-destructive/90">
+                Yes, remove teacher
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

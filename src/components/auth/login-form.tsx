@@ -27,6 +27,7 @@ import { auth, db, googleProvider } from "@/lib/firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { Separator } from "@/components/ui/separator";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "@/hooks/use-auth";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -36,6 +37,7 @@ const formSchema = z.object({
 export function LoginForm() {
   const { toast } = useToast();
   const router = useRouter();
+  const { user, loading } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,6 +46,14 @@ export function LoginForm() {
       password: "",
     },
   });
+
+  if (loading) {
+    return <div>Loading...</div>; // Or a spinner component
+  }
+  if (user) {
+    router.push('/dashboard');
+    return null; // Or a loading indicator
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {

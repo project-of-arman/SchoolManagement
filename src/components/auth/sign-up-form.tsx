@@ -24,11 +24,12 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { auth, db, googleProvider } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { Separator } from "../ui/separator";
+import { useAuth } from "@/hooks/use-auth";
 
 const formSchema = z.object({
   schoolName: z
@@ -45,6 +46,7 @@ export function SignUpForm() {
   const { toast } = useToast();
   const router = useRouter();
   const [subdomain, setSubdomain] = useState("");
+  const { user, loading } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,6 +56,13 @@ export function SignUpForm() {
       password: "",
     },
   });
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, loading, router]);
+
 
   const handleSchoolNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
@@ -91,7 +100,7 @@ export function SignUpForm() {
         title: "Registration Successful",
         description: "Your school has been created. Redirecting to dashboard...",
       });
-      router.push("/dashboard");
+      // No need to push here, useEffect will handle it
 
     } catch (error: any) {
        console.error("Sign up failed", error);
@@ -131,7 +140,7 @@ export function SignUpForm() {
             description: "Redirecting to your dashboard...",
         });
       }
-      router.push("/dashboard");
+      // No need to push here, useEffect will handle it
     } catch (error: any) {
         console.error("Google sign-up failed", error);
         toast({
@@ -140,6 +149,10 @@ export function SignUpForm() {
             variant: "destructive",
         });
     }
+  }
+
+  if (loading) {
+    return <Card className="w-full max-w-md shadow-lg"><CardContent><div className="flex justify-center p-8">Loading...</div></CardContent></Card>; 
   }
 
   const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (

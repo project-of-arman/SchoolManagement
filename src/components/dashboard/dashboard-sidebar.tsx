@@ -2,15 +2,12 @@
 
 import {
   Sidebar,
-  SidebarHeader,
   SidebarContent,
   SidebarFooter,
-  SidebarTrigger,
+  SidebarHeader,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
-  SidebarGroup,
-  SidebarGroupLabel,
+  SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { CampusConnectLogo } from "@/components/icons";
@@ -24,13 +21,39 @@ import {
   BookOpen,
   Settings,
   LogOut,
-  ChevronDown
 } from "lucide-react";
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from "@/hooks/use-auth";
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { signOut } from "firebase/auth";
+import { useEffect, useState } from "react";
+
+interface SchoolData {
+    name: string;
+    ownerEmail: string;
+}
 
 export function DashboardSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading } = useAuth();
+  const [schoolData, setSchoolData] = useState<SchoolData | null>(null);
+
+  useEffect(() => {
+    if (user) {
+        const fetchSchoolData = async () => {
+            const schoolDocRef = doc(db, "schools", user.uid);
+            const schoolDoc = await getDoc(schoolDocRef);
+            if (schoolDoc.exists()) {
+                setSchoolData(schoolDoc.data() as SchoolData);
+            }
+        };
+        fetchSchoolData();
+    }
+  }, [user]);
+
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -40,6 +63,19 @@ export function DashboardSidebar() {
     { href: "/dashboard/results", label: "Results", icon: GraduationCap },
     { href: "/dashboard/requests", label: "Certificates", icon: BookOpen },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/login');
+    } catch (error) {
+      console.error("Error signing out: ", error);
+    }
+  };
+  
+  const getInitials = (name: string = "") => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase() || 'S';
+  }
 
   return (
     <Sidebar>
@@ -79,22 +115,20 @@ export function DashboardSidebar() {
             </Link>
           </SidebarMenuItem>
           <SidebarMenuItem>
-             <Link href="/" legacyBehavior passHref>
-                <SidebarMenuButton tooltip="Logout">
-                  <LogOut />
-                  <span>Logout</span>
-                </SidebarMenuButton>
-              </Link>
+            <SidebarMenuButton tooltip="Logout" onClick={handleLogout}>
+                <LogOut />
+                <span>Logout</span>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         <SidebarSeparator />
         <div className="flex items-center gap-3 p-2">
             <Avatar>
-                <AvatarImage src="https://placehold.co/100x100.png" alt="School Owner" data-ai-hint="person" />
-                <AvatarFallback>SO</AvatarFallback>
+                <AvatarImage src={user?.photoURL || `https://placehold.co/100x100.png`} alt="School Owner" data-ai-hint="person" />
+                <AvatarFallback>{schoolData ? getInitials(schoolData.name) : '...'}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-                <span className="font-semibold text-sm">Sunrise School</span>
-                <span className="text-xs text-muted-foreground">owner@sunrise.com</span>
+                <span className="font-semibold text-sm">{schoolData ? schoolData.name : "Loading..."}</span>
+                <span className="text-xs text-muted-foreground">{schoolData ? schoolData.ownerEmail : "..."}</span>
             </div>
         </div>
       </SidebarFooter>

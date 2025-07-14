@@ -1,11 +1,9 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { UploadCloud, X } from "lucide-react";
 import { Label } from "./ui/label";
-import { useAuth } from "@/hooks/use-auth";
-import { storage } from "@/lib/firebase";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Progress } from "./ui/progress";
 import Image from "next/image";
 import { Button } from "./ui/button";
@@ -18,8 +16,10 @@ type FileUploadProps = {
   initialUrl?: string | null;
 };
 
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
 export function FileUpload({ id, label, accept = "image/*", onUploadComplete, initialUrl }: FileUploadProps) {
-  const { user } = useAuth();
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -28,41 +28,66 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
     setPreviewUrl(initialUrl || null);
   }, [initialUrl]);
 
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && user) {
-      // Set preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
 
-      // Start upload
-      setIsUploading(true);
-      const storageRef = ref(storage, `schools/${user.uid}/student-photos/${Date.now()}_${file.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, file);
+    if (!CLOUD_NAME || !UPLOAD_PRESET) {
+        console.error("Cloudinary environment variables are not configured.");
+        // Optionally, show a toast to the user
+        return;
+    }
 
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(progress);
-        },
-        (error) => {
-          console.error("Upload failed:", error);
-          setIsUploading(false);
-          // TODO: Add toast notification for error
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            onUploadComplete(downloadURL);
-            setPreviewUrl(downloadURL); // Update preview to final URL
+    // Set preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Start upload
+    setIsUploading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
+
+    try {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, true);
+        
+        xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const progress = (event.loaded / event.total) * 100;
+                setUploadProgress(progress);
+            }
+        };
+
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                const secureUrl = response.secure_url;
+                onUploadComplete(secureUrl);
+                setPreviewUrl(secureUrl);
+            } else {
+                console.error("Upload failed:", xhr.responseText);
+                // TODO: Add toast notification for error
+            }
             setIsUploading(false);
-          });
-        }
-      );
+        };
+
+        xhr.onerror = () => {
+             console.error("Upload failed due to a network error.");
+             setIsUploading(false);
+             // TODO: Add toast notification for error
+        };
+        
+        xhr.send(formData);
+
+    } catch (error) {
+        console.error("Upload failed:", error);
+        setIsUploading(false);
+        // TODO: Add toast notification for error
     }
   };
 

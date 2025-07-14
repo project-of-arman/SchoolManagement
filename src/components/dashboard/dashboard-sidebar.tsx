@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -21,6 +22,7 @@ import {
   BookOpen,
   Settings,
   LogOut,
+  UsersRound,
 } from "lucide-react";
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -58,6 +60,7 @@ export function DashboardSidebar() {
   const navItems = [
     { href: "/school", label: "Dashboard", icon: LayoutDashboard },
     { href: "/school/applications", label: "Applications", icon: ClipboardList },
+    { href: "/school/students", label: "Students", icon: UsersRound },
     { href: "/school/teachers", label: "Teachers", icon: Users },
     { href: "/school/payments", label: "Fee Payments", icon: Wallet },
     { href: "/school/results", label: "Results", icon: GraduationCap },

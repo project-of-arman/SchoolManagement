@@ -14,23 +14,22 @@ interface SchoolData {
   id: string;
   name: string;
   subdomain: string;
-  ownerEmail: string;
   logoUrl?: string;
   bannerUrl?: string;
 }
 
-export default function SchoolLandingPage({ params }: { params: { schoolId: string } }) {
+export default function SchoolLandingPage({ params }: { params: { subdomain: string } }) {
   const [school, setSchool] = useState<SchoolData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchSchoolData() {
-      if (!params.schoolId) return;
+      if (!params.subdomain) return;
 
       try {
         setLoading(true);
-        const response = await fetch(`/api/schools/${params.schoolId}`);
+        const response = await fetch(`/api/schools/${params.subdomain}`);
         if (!response.ok) {
           throw new Error('School not found');
         }
@@ -44,7 +43,7 @@ export default function SchoolLandingPage({ params }: { params: { schoolId: stri
     }
 
     fetchSchoolData();
-  }, [params.schoolId]);
+  }, [params.subdomain]);
 
   if (loading) {
     return (

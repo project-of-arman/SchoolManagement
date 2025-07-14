@@ -9,7 +9,6 @@ import { CampusConnectLogo } from "@/components/icons";
 import { Card, CardContent } from "@/components/ui/card";
 import { School, Building, Globe, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { ClientOnly } from "@/components/client-only";
 
 interface SchoolData {
   id: string;
@@ -23,16 +22,26 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
   const [school, setSchool] = useState<SchoolData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+  const [year, setYear] = useState<number | null>(null);
+
   useEffect(() => {
+    setYear(new Date().getFullYear());
+
     async function fetchSchoolData() {
-      if (!params.subdomain) return;
+      if (!params.subdomain) {
+        setLoading(false);
+        setError("No subdomain provided.");
+        return;
+      };
 
       try {
         setLoading(true);
         const response = await fetch(`/api/schools/${params.subdomain}`);
         if (!response.ok) {
-          throw new Error('School not found');
+          if (response.status === 404) {
+            throw new Error('School not found');
+          }
+          throw new Error('Failed to fetch school data');
         }
         const data = await response.json();
         setSchool(data);
@@ -115,7 +124,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
             </p>
             <div className="mt-8 flex justify-center gap-4">
                 <Button size="lg" asChild>
-                    <Link href={`/school/applications`}>Apply Now</Link>
+                    <Link href={`/${params.subdomain}/apply`}>Apply Now</Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
                      <Link href="/login">School Login</Link>
@@ -143,7 +152,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-8">
         <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
           <p className="text-sm text-muted-foreground">
-            <ClientOnly>&copy; {new Date().getFullYear()} {school.name}. All rights reserved.</ClientOnly>
+            &copy; {year} {school.name}. All rights reserved.
           </p>
            <p className="text-sm text-muted-foreground mt-4 md:mt-0">
             Powered by <Link href="/" className="font-semibold text-primary hover:underline">CampusConnect</Link>

@@ -22,15 +22,15 @@ export async function GET(
     }
 
     const schoolDoc = querySnapshot.docs[0];
-    const schoolData = { id: schoolDoc.id, ...schoolDoc.data() };
+    const schoolData = schoolDoc.data();
 
     // Select only public-facing fields to return
     const publicData = {
-        id: schoolData.id,
+        id: schoolDoc.id,
         name: schoolData.name,
         subdomain: schoolData.subdomain,
-        logoUrl: schoolData.logoUrl,
-        bannerUrl: schoolData.bannerUrl,
+        logoUrl: schoolData.logoUrl || null,
+        bannerUrl: schoolData.bannerUrl || null,
     };
 
     return NextResponse.json(publicData, { status: 200 });

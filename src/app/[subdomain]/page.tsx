@@ -19,7 +19,6 @@ interface SchoolData {
 }
 
 export default function SchoolLandingPage({ params }: { params: { subdomain: string } }) {
-  const { subdomain } = params;
   const [school, setSchool] = useState<SchoolData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +28,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
     setYear(new Date().getFullYear());
 
     async function fetchSchoolData() {
+      const { subdomain } = params;
       if (!subdomain) {
         setLoading(false);
         setError("No subdomain provided.");
@@ -54,7 +54,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
     }
 
     fetchSchoolData();
-  }, [subdomain]);
+  }, [params]);
 
   if (loading) {
     return (
@@ -126,7 +126,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
             </p>
             <div className="mt-8 flex justify-center gap-4">
                 <Button size="lg" asChild>
-                    <Link href={`/${subdomain}/apply`}>Apply Now</Link>
+                    <Link href={`/${school.subdomain}/apply`}>Apply Now</Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
                      <Link href="/login">School Login</Link>

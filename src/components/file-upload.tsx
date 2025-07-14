@@ -45,7 +45,7 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
     reader.readAsDataURL(file);
 
     setIsUploading(true);
-    setUploadProgress(0);
+    setUploadProgress(0); // This can be integrated with XHR progress events for real progress
 
     const formData = new FormData();
     formData.append("file", file);
@@ -55,7 +55,6 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
         const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
             method: "POST",
             body: formData,
-            // Note: We don't set Content-Type header, browser does it for FormData
         });
 
         if (response.ok) {
@@ -102,6 +101,7 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
                 size="icon"
                 className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
                 onClick={clearPreview}
+                type="button"
               >
                 <X className="h-4 w-4"/>
                 <span className="sr-only">Remove Image</span>

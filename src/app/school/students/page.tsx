@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, MoreHorizontal, Trash2, CalendarIcon } from "lucide-react";
+import { PlusCircle, MoreHorizontal, Trash2, CalendarIcon, Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -127,6 +127,7 @@ export default function StudentsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
 
@@ -163,11 +164,13 @@ export default function StudentsPage() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     if (dialogMode === 'add') {
       await handleAddStudent();
     } else {
       await handleUpdateStudent();
     }
+    setIsSaving(false);
   }
 
   const handleAddStudent = async () => {
@@ -199,8 +202,9 @@ export default function StudentsPage() {
     if (!studentFormData.id || !currentUser) return;
     try {
         const studentDoc = doc(db, "schools", currentUser.uid, "students", studentFormData.id);
-        const { id, ...studentData } = studentFormData;
-        await updateDoc(studentDoc, studentData as any);
+        const { id, ...studentDataToUpdate } = studentFormData; 
+
+        await updateDoc(studentDoc, studentDataToUpdate);
         toast({ title: "Success", description: "Student details updated." });
         setIsStudentDialogOpen(false);
         setStudentFormData(initialStudentState);
@@ -246,7 +250,13 @@ export default function StudentsPage() {
 
   const openEditDialog = (student: Student) => {
     setDialogMode('edit');
-    setStudentFormData(student);
+    // Ensure all data including dates are properly handled
+    const studentToEdit = {
+        ...student,
+        dateOfBirth: student.dateOfBirth ? new Date(student.dateOfBirth) : null,
+        admissionDate: student.admissionDate ? new Date(student.admissionDate) : null,
+    };
+    setStudentFormData(studentToEdit);
     setIsStudentDialogOpen(true);
   }
 
@@ -397,7 +407,14 @@ export default function StudentsPage() {
                   </Tabs>
                 <DialogFooter className="pt-4 border-t">
                   <Button type="button" variant="secondary" onClick={() => setIsStudentDialogOpen(false)}>Cancel</Button>
-                  <Button type="submit">Save Student</Button>
+                  <Button type="submit" disabled={isSaving}>
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : 'Save Student'}
+                  </Button>
                 </DialogFooter>
               </form>
           </DialogContent>

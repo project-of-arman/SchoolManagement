@@ -1,10 +1,20 @@
+
+"use client";
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CampusConnectLogo } from '@/components/icons';
 import { ArrowRight, Star, Users, Briefcase, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
+
   const features = [
     {
       icon: <Users className="h-8 w-8 text-primary" />,
@@ -107,7 +117,7 @@ export default function Home() {
             <span className="text-md font-bold font-headline">CampusConnect</span>
           </div>
           <p className="text-sm text-muted-foreground mt-4 md:mt-0">
-            &copy; {new Date().getFullYear()} CampusConnect SaaS. All rights reserved.
+            &copy; {currentYear} CampusConnect SaaS. All rights reserved.
           </p>
         </div>
       </footer>

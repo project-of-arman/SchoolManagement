@@ -22,13 +22,20 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
   const [school, setSchool] = useState<SchoolData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
   useEffect(() => {
     async function fetchSchoolData() {
+      // The parameter is now `schoolId` based on the file name [schoolId]/page.tsx
       if (!params.subdomain) return;
 
       try {
         setLoading(true);
+        // The API route is /api/schools/[subdomain]
         const response = await fetch(`/api/schools/${params.subdomain}`);
         if (!response.ok) {
           throw new Error('School not found');
@@ -87,9 +94,8 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
             <Image
                 src={school.bannerUrl || 'https://placehold.co/1200x400.png'}
                 alt={`${school.name} Banner`}
-                layout="fill"
-                objectFit="cover"
-                className="brightness-50"
+                fill
+                className="object-cover brightness-50"
                 data-ai-hint="school building"
             />
             <div className="relative z-10 p-4">
@@ -143,7 +149,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-8">
         <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} {school.name}. All rights reserved.
+            &copy; {currentYear} {school.name}. All rights reserved.
           </p>
            <p className="text-sm text-muted-foreground mt-4 md:mt-0">
             Powered by <Link href="/" className="font-semibold text-primary hover:underline">CampusConnect</Link>

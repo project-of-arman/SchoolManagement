@@ -4,6 +4,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
+import type { LinkProps } from "next/link"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -533,28 +534,27 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
-const SidebarMenuButton = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<"button"> & {
-    asChild?: boolean
+type SidebarMenuButtonProps<T extends React.ElementType = "button"> = (React.ComponentProps<T> & { as?: T }) & {
     isActive?: boolean
     tooltip?: string | React.ComponentProps<typeof TooltipContent>
-  } & VariantProps<typeof sidebarMenuButtonVariants>
->(
-  (
+} & VariantProps<typeof sidebarMenuButtonVariants>
+
+
+const SidebarMenuButton = React.forwardRef(
+  <T extends React.ElementType = "button">(
     {
-      asChild = false,
+      as,
       isActive = false,
       variant = "default",
       size = "default",
       tooltip,
       className,
       ...props
-    },
-    ref
+    } : SidebarMenuButtonProps<T>,
+    ref: React.ForwardedRef<HTMLButtonElement>
   ) => {
-    const Comp = asChild ? Slot : "button"
-    const { isMobile, state } = useSidebar()
+    const Comp = as || "button";
+    const { isMobile, state } = useSidebar();
 
     const button = (
       <Comp
@@ -565,16 +565,16 @@ const SidebarMenuButton = React.forwardRef<
         className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
         {...props}
       />
-    )
+    );
 
     if (!tooltip) {
-      return button
+      return button;
     }
 
     if (typeof tooltip === "string") {
       tooltip = {
         children: tooltip,
-      }
+      };
     }
 
     return (
@@ -587,9 +587,10 @@ const SidebarMenuButton = React.forwardRef<
           {...tooltip}
         />
       </Tooltip>
-    )
+    );
   }
-)
+);
+
 SidebarMenuButton.displayName = "SidebarMenuButton"
 
 const SidebarMenuAction = React.forwardRef<

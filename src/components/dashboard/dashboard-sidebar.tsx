@@ -91,15 +91,15 @@ export function DashboardSidebar() {
         <SidebarMenu>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} legacyBehavior passHref>
-                <SidebarMenuButton
+              <SidebarMenuButton
+                  as={Link}
+                  href={item.href}
                   isActive={pathname === item.href}
                   tooltip={item.label}
                 >
                   <item.icon />
                   <span>{item.label}</span>
                 </SidebarMenuButton>
-              </Link>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
@@ -107,12 +107,10 @@ export function DashboardSidebar() {
       <SidebarFooter>
         <SidebarSeparator />
          <SidebarMenuItem>
-            <Link href="/dashboard/settings" legacyBehavior passHref>
-              <SidebarMenuButton isActive={pathname === '/dashboard/settings'} tooltip="Settings">
-                <Settings />
-                <span>Settings</span>
-              </SidebarMenuButton>
-            </Link>
+            <SidebarMenuButton as={Link} href="/dashboard/settings" isActive={pathname === '/dashboard/settings'} tooltip="Settings">
+              <Settings />
+              <span>Settings</span>
+            </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton tooltip="Logout" onClick={handleLogout}>

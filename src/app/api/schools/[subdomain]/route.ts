@@ -1,13 +1,19 @@
 
 import { collection, getDocs, query, where, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db, app as firebaseApp } from "@/lib/firebase"; // Import app to check initialization
 import { NextResponse } from "next/server";
+import { getApps } from "firebase/app";
 
 export async function GET(
   request: Request,
   { params }: { params: { subdomain: string } }
 ) {
   try {
+    // Ensure Firebase is initialized
+    if (!getApps().length) {
+      return NextResponse.json({ error: "Firebase not initialized" }, { status: 500 });
+    }
+
     const subdomain = params.subdomain;
     if (!subdomain) {
       return NextResponse.json({ error: "Subdomain is required" }, { status: 400 });

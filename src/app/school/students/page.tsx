@@ -342,114 +342,114 @@ export default function StudentsPage() {
       
       {/* Add/Edit Dialog */}
       <Dialog open={isStudentDialogOpen} onOpenChange={setIsStudentDialogOpen}>
+        <form onSubmit={handleFormSubmit}>
           <DialogContent className="max-w-4xl">
-              <form onSubmit={handleFormSubmit}>
-                <DialogHeader>
-                <DialogTitle>{dialogMode === 'add' ? 'Add New Student' : 'Edit Student Details'}</DialogTitle>
-                <DialogDescription>
-                    {dialogMode === 'add' ? 'Fill in the details below to add a new student.' : `Editing details for ${studentFormData.firstName} ${studentFormData.lastName}.`}
-                </DialogDescription>
-                </DialogHeader>
-                  <Tabs defaultValue="student-details">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="student-details">Student Details</TabsTrigger>
-                        <TabsTrigger value="guardian-details">Parent / Guardian Details</TabsTrigger>
-                    </TabsList>
-                    <div className="max-h-[60vh] overflow-y-auto p-1">
-                    <TabsContent value="student-details">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
-                            <div className="space-y-2"><Label>Admission No</Label><Input id="admissionNo" value={studentFormData.admissionNo} onChange={handleInputChange} /></div>
-                            <div className="space-y-2"><Label>Roll Number *</Label><Input id="rollNumber" value={studentFormData.rollNumber} onChange={handleInputChange} required /></div>
-                            <div className="space-y-2"><Label>Section</Label><Input id="section" value={studentFormData.section} onChange={handleInputChange} /></div>
-                            <div className="space-y-2"><Label>Class *</Label><Input id="className" value={studentFormData.className} onChange={handleInputChange} required /></div>
-                            <div className="space-y-2"><Label>First Name *</Label><Input id="firstName" value={studentFormData.firstName} onChange={handleInputChange} required /></div>
-                            <div className="space-y-2"><Label>Last Name</Label><Input id="lastName" value={studentFormData.lastName} onChange={handleInputChange} /></div>
-                            <div className="space-y-2"><Label>Gender</Label>
-                                <Select onValueChange={(v) => handleSelectChange('gender', v)} value={studentFormData.gender}>
-                                    <SelectTrigger><SelectValue placeholder="Select Gender" /></SelectTrigger>
-                                    <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2 flex flex-col"><Label>Date of Birth</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild><Button variant={"outline"} className={cn("justify-start text-left font-normal", !studentFormData.dateOfBirth && "text-muted-foreground")}>{studentFormData.dateOfBirth ? format(new Date(studentFormData.dateOfBirth), "PPP") : (<span>Pick a date</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={studentFormData.dateOfBirth ? new Date(studentFormData.dateOfBirth) : undefined} onSelect={(d) => handleDateChange('dateOfBirth', d)} initialFocus /></PopoverContent>
-                                </Popover>
-                            </div>
-                            <div className="space-y-2"><Label>Religion</Label><Input id="religion" value={studentFormData.religion} onChange={handleInputChange} /></div>
-                            <div className="space-y-2"><Label>Mobile Number</Label><Input id="mobileNumber" type="tel" value={studentFormData.mobileNumber} onChange={handleInputChange} /></div>
-                            <div className="space-y-2 flex flex-col"><Label>Admission Date</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild><Button variant={"outline"} className={cn("justify-start text-left font-normal", !studentFormData.admissionDate && "text-muted-foreground")}>{studentFormData.admissionDate ? format(new Date(studentFormData.admissionDate), "PPP") : (<span>Pick a date</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={studentFormData.admissionDate ? new Date(studentFormData.admissionDate) : undefined} onSelect={(d) => handleDateChange('admissionDate', d)} initialFocus /></PopoverContent>
-                                </Popover>
-                            </div>
-                            <div className="space-y-2"><Label>Blood Group</Label><Input id="bloodGroup" value={studentFormData.bloodGroup} onChange={handleInputChange} /></div>
-                            <div className="md:col-span-3">
-                                <FileUpload 
-                                    id="student-photo" 
-                                    label="Student Photo" 
-                                    onUploadComplete={handlePhotoUpload} 
-                                    initialUrl={studentFormData.photoUrl}
-                                />
-                            </div>
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="guardian-details">
-                        <div className="space-y-6 py-4">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-md">
-                                <h3 className="md:col-span-3 font-semibold">Father's Details</h3>
-                                <div className="space-y-2"><Label>Father Name</Label><Input id="fatherName" value={studentFormData.fatherName} onChange={handleInputChange} /></div>
-                                <div className="space-y-2"><Label>Father Phone</Label><Input id="fatherPhone" type="tel" value={studentFormData.fatherPhone} onChange={handleInputChange}/></div>
-                                <div className="space-y-2"><Label>Father Occupation</Label><Input id="fatherOccupation" value={studentFormData.fatherOccupation} onChange={handleInputChange} /></div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-md">
-                                <h3 className="md:col-span-3 font-semibold">Mother's Details</h3>
-                                <div className="space-y-2"><Label>Mother Name</Label><Input id="motherName" value={studentFormData.motherName} onChange={handleInputChange} /></div>
-                                <div className="space-y-2"><Label>Mother Phone</Label><Input id="motherPhone" type="tel" value={studentFormData.motherPhone} onChange={handleInputChange} /></div>
-                                <div className="space-y-2"><Label>Mother Occupation</Label><Input id="motherOccupation" value={studentFormData.motherOccupation} onChange={handleInputChange} /></div>
-                            </div>
+              <DialogHeader>
+              <DialogTitle>{dialogMode === 'add' ? 'Add New Student' : 'Edit Student Details'}</DialogTitle>
+              <DialogDescription>
+                  {dialogMode === 'add' ? 'Fill in the details below to add a new student.' : `Editing details for ${studentFormData.firstName} ${studentFormData.lastName}.`}
+              </DialogDescription>
+              </DialogHeader>
+                <Tabs defaultValue="student-details">
+                  <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="student-details">Student Details</TabsTrigger>
+                      <TabsTrigger value="guardian-details">Parent / Guardian Details</TabsTrigger>
+                  </TabsList>
+                  <div className="max-h-[60vh] overflow-y-auto p-1">
+                  <TabsContent value="student-details">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
+                          <div className="space-y-2"><Label>Admission No</Label><Input id="admissionNo" value={studentFormData.admissionNo} onChange={handleInputChange} /></div>
+                          <div className="space-y-2"><Label>Roll Number *</Label><Input id="rollNumber" value={studentFormData.rollNumber} onChange={handleInputChange} required /></div>
+                          <div className="space-y-2"><Label>Section</Label><Input id="section" value={studentFormData.section} onChange={handleInputChange} /></div>
+                          <div className="space-y-2"><Label>Class *</Label><Input id="className" value={studentFormData.className} onChange={handleInputChange} required /></div>
+                          <div className="space-y-2"><Label>First Name *</Label><Input id="firstName" value={studentFormData.firstName} onChange={handleInputChange} required /></div>
+                          <div className="space-y-2"><Label>Last Name</Label><Input id="lastName" value={studentFormData.lastName} onChange={handleInputChange} /></div>
+                          <div className="space-y-2"><Label>Gender</Label>
+                              <Select onValueChange={(v) => handleSelectChange('gender', v)} value={studentFormData.gender}>
+                                  <SelectTrigger><SelectValue placeholder="Select Gender" /></SelectTrigger>
+                                  <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent>
+                              </Select>
+                          </div>
+                          <div className="space-y-2 flex flex-col"><Label>Date of Birth</Label>
+                              <Popover>
+                                  <PopoverTrigger asChild><Button variant={"outline"} className={cn("justify-start text-left font-normal", !studentFormData.dateOfBirth && "text-muted-foreground")}>{studentFormData.dateOfBirth ? format(new Date(studentFormData.dateOfBirth), "PPP") : (<span>Pick a date</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={studentFormData.dateOfBirth ? new Date(studentFormData.dateOfBirth) : undefined} onSelect={(d) => handleDateChange('dateOfBirth', d)} initialFocus /></PopoverContent>
+                              </Popover>
+                          </div>
+                          <div className="space-y-2"><Label>Religion</Label><Input id="religion" value={studentFormData.religion} onChange={handleInputChange} /></div>
+                          <div className="space-y-2"><Label>Mobile Number</Label><Input id="mobileNumber" type="tel" value={studentFormData.mobileNumber} onChange={handleInputChange} /></div>
+                          <div className="space-y-2 flex flex-col"><Label>Admission Date</Label>
+                              <Popover>
+                                  <PopoverTrigger asChild><Button variant={"outline"} className={cn("justify-start text-left font-normal", !studentFormData.admissionDate && "text-muted-foreground")}>{studentFormData.admissionDate ? format(new Date(studentFormData.admissionDate), "PPP") : (<span>Pick a date</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={studentFormData.admissionDate ? new Date(studentFormData.admissionDate) : undefined} onSelect={(d) => handleDateChange('admissionDate', d)} initialFocus /></PopoverContent>
+                              </Popover>
+                          </div>
+                          <div className="space-y-2"><Label>Blood Group</Label><Input id="bloodGroup" value={studentFormData.bloodGroup} onChange={handleInputChange} /></div>
+                          <div className="md:col-span-3">
+                              <FileUpload 
+                                  id="student-photo" 
+                                  label="Student Photo" 
+                                  onUploadComplete={handlePhotoUpload} 
+                                  initialUrl={studentFormData.photoUrl}
+                              />
+                          </div>
+                      </div>
+                  </TabsContent>
+                  <TabsContent value="guardian-details">
+                      <div className="space-y-6 py-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-md">
+                              <h3 className="md:col-span-3 font-semibold">Father's Details</h3>
+                              <div className="space-y-2"><Label>Father Name</Label><Input id="fatherName" value={studentFormData.fatherName} onChange={handleInputChange} /></div>
+                              <div className="space-y-2"><Label>Father Phone</Label><Input id="fatherPhone" type="tel" value={studentFormData.fatherPhone} onChange={handleInputChange}/></div>
+                              <div className="space-y-2"><Label>Father Occupation</Label><Input id="fatherOccupation" value={studentFormData.fatherOccupation} onChange={handleInputChange} /></div>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-md">
+                              <h3 className="md:col-span-3 font-semibold">Mother's Details</h3>
+                              <div className="space-y-2"><Label>Mother Name</Label><Input id="motherName" value={studentFormData.motherName} onChange={handleInputChange} /></div>
+                              <div className="space-y-2"><Label>Mother Phone</Label><Input id="motherPhone" type="tel" value={studentFormData.motherPhone} onChange={handleInputChange} /></div>
+                              <div className="space-y-2"><Label>Mother Occupation</Label><Input id="motherOccupation" value={studentFormData.motherOccupation} onChange={handleInputChange} /></div>
+                          </div>
 
-                            <div className="p-4 border rounded-md space-y-4">
-                                <h3 className="font-semibold">Guardian Details</h3>
-                                <RadioGroup value={studentFormData.guardianIs} onValueChange={(v) => handleGuardianRadioChange(v as 'father'|'mother'|'other')}>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="father" id="g-father" /><Label htmlFor="g-father">Father is Guardian</Label></div>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="mother" id="g-mother" /><Label htmlFor="g-mother">Mother is Guardian</Label></div>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="other" id="g-other" /><Label htmlFor="g-other">Other Guardian</Label></div>
-                                </RadioGroup>
-                                
-                                {studentFormData.guardianIs === 'other' && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
-                                        <div className="space-y-2"><Label>Guardian Name</Label><Input id="guardianName" value={studentFormData.guardianName} onChange={handleInputChange} /></div>
-                                        <div className="space-y-2"><Label>Guardian Relation</Label><Input id="guardianRelation" value={studentFormData.guardianRelation ?? ''} onChange={handleInputChange} /></div>
-                                        <div className="space-y-2"><Label>Guardian Phone</Label><Input id="guardianPhone" value={studentFormData.guardianPhone ?? ''} onChange={handleInputChange} /></div>
-                                        <div className="space-y-2"><Label>Guardian Occupation</Label><Input id="guardianOccupation" value={studentFormData.guardianOccupation ?? ''} onChange={handleInputChange} /></div>
-                                        <div className="md:col-span-2 space-y-2"><Label>Guardian Address</Label><Textarea id="guardianAddress" value={studentFormData.guardianAddress ?? ''} onChange={handleInputChange} /></div>
-                                    </div>
-                                )}
-                                {studentFormData.guardianIs !== 'other' && (
-                                    <div className="pt-4 border-t">
-                                    <div className="space-y-2"><Label>Guardian Address</Label><Textarea id="guardianAddress" value={studentFormData.guardianAddress ?? ''} onChange={handleInputChange} /></div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </TabsContent>
-                    </div>
-                  </Tabs>
-                <DialogFooter className="pt-4 border-t">
-                  <Button type="button" variant="secondary" onClick={() => setIsStudentDialogOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={isSaving}>
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : 'Save Student'}
-                  </Button>
-                </DialogFooter>
-              </form>
+                          <div className="p-4 border rounded-md space-y-4">
+                              <h3 className="font-semibold">Guardian Details</h3>
+                              <RadioGroup value={studentFormData.guardianIs} onValueChange={(v) => handleGuardianRadioChange(v as 'father'|'mother'|'other')}>
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="father" id="g-father" /><Label htmlFor="g-father">Father is Guardian</Label></div>
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="mother" id="g-mother" /><Label htmlFor="g-mother">Mother is Guardian</Label></div>
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="other" id="g-other" /><Label htmlFor="g-other">Other Guardian</Label></div>
+                              </RadioGroup>
+                              
+                              {studentFormData.guardianIs === 'other' && (
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                                      <div className="space-y-2"><Label>Guardian Name</Label><Input id="guardianName" value={studentFormData.guardianName} onChange={handleInputChange} /></div>
+                                      <div className="space-y-2"><Label>Guardian Relation</Label><Input id="guardianRelation" value={studentFormData.guardianRelation ?? ''} onChange={handleInputChange} /></div>
+                                      <div className="space-y-2"><Label>Guardian Phone</Label><Input id="guardianPhone" value={studentFormData.guardianPhone ?? ''} onChange={handleInputChange} /></div>
+                                      <div className="space-y-2"><Label>Guardian Occupation</Label><Input id="guardianOccupation" value={studentFormData.guardianOccupation ?? ''} onChange={handleInputChange} /></div>
+                                      <div className="md:col-span-2 space-y-2"><Label>Guardian Address</Label><Textarea id="guardianAddress" value={studentFormData.guardianAddress ?? ''} onChange={handleInputChange} /></div>
+                                  </div>
+                              )}
+                              {studentFormData.guardianIs !== 'other' && (
+                                  <div className="pt-4 border-t">
+                                  <div className="space-y-2"><Label>Guardian Address</Label><Textarea id="guardianAddress" value={studentFormData.guardianAddress ?? ''} onChange={handleInputChange} /></div>
+                                  </div>
+                              )}
+                          </div>
+                      </div>
+                  </TabsContent>
+                  </div>
+                </Tabs>
+              <DialogFooter className="pt-4 border-t">
+                <Button type="button" variant="secondary" onClick={() => setIsStudentDialogOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : 'Save Student'}
+                </Button>
+              </DialogFooter>
           </DialogContent>
+        </form>
       </Dialog>
       
        {/* View Details Dialog */}
@@ -615,5 +615,7 @@ export default function StudentsPage() {
     </div>
   );
 }
+
+    
 
     

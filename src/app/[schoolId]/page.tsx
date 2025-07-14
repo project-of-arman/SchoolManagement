@@ -1,12 +1,14 @@
-import { collection, getDocs, query, where, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CampusConnectLogo } from "@/components/icons";
-import { notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { School, Building, Globe } from "lucide-react";
+import { School, Building, Globe, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 interface SchoolData {
   id: string;
@@ -17,36 +19,58 @@ interface SchoolData {
   bannerUrl?: string;
 }
 
-async function getSchoolBySubdomain(subdomain: string): Promise<SchoolData | null> {
-  try {
-    const schoolsRef = collection(db, "schools");
-    const q = query(schoolsRef, where("subdomain", "==", subdomain), limit(1));
-    const querySnapshot = await getDocs(q);
+export default function SchoolLandingPage({ params }: { params: { schoolId: string } }) {
+  const [school, setSchool] = useState<SchoolData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    if (querySnapshot.empty) {
-      return null;
+  useEffect(() => {
+    async function fetchSchoolData() {
+      if (!params.schoolId) return;
+
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/schools/${params.schoolId}`);
+        if (!response.ok) {
+          throw new Error('School not found');
+        }
+        const data = await response.json();
+        setSchool(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    const schoolDoc = querySnapshot.docs[0];
-    return { id: schoolDoc.id, ...schoolDoc.data() } as SchoolData;
-  } catch (error) {
-    console.error("Error fetching school data:", error);
-    return null;
+    fetchSchoolData();
+  }, [params.schoolId]);
+
+  if (loading) {
+    return (
+        <div className="flex min-h-screen flex-col items-center justify-center p-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="mt-4 text-muted-foreground">Loading school information...</p>
+        </div>
+    );
   }
-}
 
-export default async function SchoolLandingPage({ params }: { params: { schoolId: string } }) {
-  const school = await getSchoolBySubdomain(params.schoolId);
-
-  if (!school) {
-    notFound();
+  if (error || !school) {
+     return (
+        <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
+            <PageHeader title="School Not Found" description="The school you are looking for does not exist or the URL is incorrect." />
+             <Button asChild>
+                <Link href="/">Go to Homepage</Link>
+            </Button>
+        </div>
+    );
   }
 
   const features = [
       { icon: <School className="h-6 w-6 text-primary"/>, text: "Modern Curriculum" },
       { icon: <Building className="h-6 w-6 text-primary"/>, text: "State-of-the-art Facilities" },
       { icon: <Globe className="h-6 w-6 text-primary"/>, text: "Global Community" },
-  ]
+  ];
 
   return (
     <div className="bg-background min-h-screen">

@@ -38,14 +38,12 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
         return;
     }
 
-    // Set preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewUrl(reader.result as string);
     };
     reader.readAsDataURL(file);
 
-    // Start upload
     setIsUploading(true);
     setUploadProgress(0);
 
@@ -54,46 +52,30 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
     formData.append("upload_preset", UPLOAD_PRESET);
 
     try {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, true);
-        
-        xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-                const progress = (event.loaded / event.total) * 100;
-                setUploadProgress(progress);
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+            method: "POST",
+            body: formData,
+            // Note: We don't set Content-Type header, browser does it for FormData
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const secureUrl = data.secure_url;
+            setPreviewUrl(secureUrl);
+            if (onUploadComplete) {
+                onUploadComplete(secureUrl);
             }
-        };
-
-        xhr.onload = () => {
-            if (xhr.status === 200) {
-                const response = JSON.parse(xhr.responseText);
-                const secureUrl = response.secure_url;
-                if(onUploadComplete) {
-                  onUploadComplete(secureUrl);
-                }
-                setPreviewUrl(secureUrl);
-            } else {
-                console.error("Upload failed:", xhr.responseText);
-                setPreviewUrl(initialUrl || null); // Revert on failure
-                // TODO: Add toast notification for error
-            }
-            setIsUploading(false);
-        };
-
-        xhr.onerror = () => {
-             console.error("Upload failed due to a network error.");
-             setIsUploading(false);
-             setPreviewUrl(initialUrl || null); // Revert on failure
-             // TODO: Add toast notification for error
-        };
-        
-        xhr.send(formData);
-
+        } else {
+            console.error("Upload failed:", await response.text());
+            setPreviewUrl(initialUrl || null); // Revert on failure
+            // TODO: Add toast notification for error
+        }
     } catch (error) {
         console.error("Upload failed:", error);
-        setIsUploading(false);
         setPreviewUrl(initialUrl || null); // Revert on failure
-        // TODO: Add toast notification for error
+         // TODO: Add toast notification for error
+    } finally {
+        setIsUploading(false);
     }
   };
 
@@ -101,6 +83,10 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
     setPreviewUrl(null);
     if (onUploadComplete) {
         onUploadComplete(""); // Notify parent component that the image is cleared
+    }
+    const input = document.getElementById(id) as HTMLInputElement;
+    if (input) {
+        input.value = "";
     }
   }
 
@@ -128,8 +114,8 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
           >
             {isUploading ? (
               <div className="flex flex-col items-center justify-center w-full px-4">
+                 <p className="text-sm text-muted-foreground mb-2">Uploading...</p>
                  <Progress value={uploadProgress} className="w-full" />
-                 <p className="mt-2 text-sm text-muted-foreground">{Math.round(uploadProgress)}%</p>
               </div>
             ) : (
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">

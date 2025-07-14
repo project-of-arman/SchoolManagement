@@ -10,12 +10,12 @@ import { getFirestore } from "firebase/firestore";
 // for the app to connect to your Firebase project.
 // You can find these in your Firebase project settings.
 const firebaseConfig: FirebaseOptions = {
-  apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-  authDomain: "your-project-id.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef1234567890abcdef",
+  apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // <-- REPLACE WITH YOURS
+  authDomain: "your-project-id.firebaseapp.com", // <-- REPLACE WITH YOURS
+  projectId: "your-project-id", // <-- REPLACE WITH YOURS
+  storageBucket: "your-project-id.appspot.com", // <-- REPLACE WITH YOURS
+  messagingSenderId: "123456789012", // <-- REPLACE WITH YOURS
+  appId: "1:123456789012:web:abcdef1234567890abcdef", // <-- REPLACE WITH YOURS
 };
 
 // Initialize Firebase

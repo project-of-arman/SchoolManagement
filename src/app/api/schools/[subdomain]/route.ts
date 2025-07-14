@@ -1,29 +1,20 @@
 
-import { collection, getDocs, query, where, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { adminDb } from "@/lib/firebase-admin";
 import { NextResponse } from "next/server";
-import { getApps } from "firebase/app";
 
 export async function GET(
   request: Request,
   { params }: { params: { subdomain: string } }
 ) {
   try {
-    // Ensure Firebase is initialized
-    if (!getApps().length) {
-       // This is a server-side check, app should be initialized by firebase.ts
-       // If not, it's a critical configuration error.
-      throw new Error("Firebase has not been initialized.");
-    }
-
     const subdomain = params.subdomain;
     if (!subdomain) {
       return NextResponse.json({ error: "Subdomain is required" }, { status: 400 });
     }
     
-    const schoolsRef = collection(db, "schools");
-    const q = query(schoolsRef, where("subdomain", "==", subdomain), limit(1));
-    const querySnapshot = await getDocs(q);
+    const schoolsRef = adminDb.collection("schools");
+    const q = schoolsRef.where("subdomain", "==", subdomain).limit(1);
+    const querySnapshot = await q.get();
 
     if (querySnapshot.empty) {
       return NextResponse.json({ error: "School not found" }, { status: 404 });

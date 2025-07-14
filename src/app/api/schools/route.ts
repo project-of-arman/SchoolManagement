@@ -1,20 +1,16 @@
-import { collection, getDocs, query } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+
+import { adminDb } from "@/lib/firebase-admin";
 import { NextResponse } from "next/server";
-import { getApps } from "firebase/app";
 
 export async function GET(request: Request) {
   try {
-    // Ensure Firebase is initialized
-    if (!getApps().length) {
-      throw new Error("Firebase has not been initialized.");
+    const schoolsCollection = await adminDb.collection("schools").get();
+
+    if (schoolsCollection.empty) {
+        return NextResponse.json([], { status: 200 });
     }
 
-    const schoolsRef = collection(db, "schools");
-    const q = query(schoolsRef);
-    const querySnapshot = await getDocs(q);
-
-    const schools = querySnapshot.docs.map(doc => {
+    const schools = schoolsCollection.docs.map(doc => {
       const data = doc.data();
       return {
         id: doc.id,

@@ -25,9 +25,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { auth, db } from "@/lib/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db, googleProvider } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { Separator } from "../ui/separator";
 
 const formSchema = z.object({
   schoolName: z
@@ -102,6 +103,54 @@ export function SignUpForm() {
     }
   }
 
+  async function handleGoogleSignUp() {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      const schoolDocRef = doc(db, "schools", user.uid);
+      const schoolDoc = await getDoc(schoolDocRef);
+
+      if (!schoolDoc.exists()) {
+        const schoolName = user.displayName || "My School";
+        const subdomain = schoolName.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 20);
+        await setDoc(schoolDocRef, {
+            name: schoolName,
+            ownerId: user.uid,
+            ownerEmail: user.email,
+            subdomain: subdomain,
+            createdAt: serverTimestamp(),
+        });
+        toast({
+            title: "Registration Successful",
+            description: "Your school has been created. Redirecting to dashboard...",
+        });
+      } else {
+        toast({
+            title: "Welcome Back!",
+            description: "Redirecting to your dashboard...",
+        });
+      }
+      router.push("/dashboard");
+    } catch (error: any) {
+        console.error("Google sign-up failed", error);
+        toast({
+            title: "Google Sign-Up Failed",
+            description: error.message || "An unexpected error occurred.",
+            variant: "destructive",
+        });
+    }
+  }
+
+  const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg role="img" viewBox="0 0 24 24" {...props}>
+      <path
+        fill="currentColor"
+        d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.9-5.12 1.9-4.4 0-7.9-3.53-7.9-7.9s3.5-7.9 7.9-7.9c2.4 0 3.82.94 4.78 1.84l2.54-2.54C18.46 1.18 15.92 0 12.48 0 5.88 0 .04 5.88.04 12.48s5.84 12.48 12.44 12.48c3.47 0 6.28-1.17 8.35-3.37 2.17-2.2 2.8-5.4 2.8-8.38v-3.28h-9.28z"
+      ></path>
+    </svg>
+  );
+
   return (
     <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="text-center">
@@ -172,6 +221,19 @@ export function SignUpForm() {
             </Button>
           </form>
         </Form>
+
+        <div className="relative my-6">
+          <Separator />
+          <div className="absolute inset-0 flex items-center">
+            <span className="bg-card px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
+          </div>
+        </div>
+
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignUp}>
+          <GoogleIcon className="mr-2 h-5 w-5" />
+          Sign up with Google
+        </Button>
+
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}
           <Link href="/login" className="underline text-primary">

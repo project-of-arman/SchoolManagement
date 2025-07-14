@@ -342,20 +342,21 @@ export default function StudentsPage() {
       
       {/* Add/Edit Dialog */}
       <Dialog open={isStudentDialogOpen} onOpenChange={setIsStudentDialogOpen}>
-        <form onSubmit={handleFormSubmit}>
           <DialogContent className="max-w-4xl">
-              <DialogHeader>
-              <DialogTitle>{dialogMode === 'add' ? 'Add New Student' : 'Edit Student Details'}</DialogTitle>
-              <DialogDescription>
-                  {dialogMode === 'add' ? 'Fill in the details below to add a new student.' : `Editing details for ${studentFormData.firstName} ${studentFormData.lastName}.`}
-              </DialogDescription>
-              </DialogHeader>
+            <DialogHeader>
+            <DialogTitle>{dialogMode === 'add' ? 'Add New Student' : 'Edit Student Details'}</DialogTitle>
+            <DialogDescription>
+                {dialogMode === 'add' ? 'Fill in the details below to add a new student.' : `Editing details for ${studentFormData.firstName} ${studentFormData.lastName}.`}
+            </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleFormSubmit}>
+              <div className="max-h-[60vh] overflow-y-auto p-1 pr-4">
                 <Tabs defaultValue="student-details">
                   <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="student-details">Student Details</TabsTrigger>
                       <TabsTrigger value="guardian-details">Parent / Guardian Details</TabsTrigger>
                   </TabsList>
-                  <div className="max-h-[60vh] overflow-y-auto p-1">
+                  
                   <TabsContent value="student-details">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
                           <div className="space-y-2"><Label>Admission No</Label><Input id="admissionNo" value={studentFormData.admissionNo} onChange={handleInputChange} /></div>
@@ -435,9 +436,9 @@ export default function StudentsPage() {
                           </div>
                       </div>
                   </TabsContent>
-                  </div>
                 </Tabs>
-              <DialogFooter className="pt-4 border-t">
+              </div>
+              <DialogFooter className="pt-4 mt-4 border-t">
                 <Button type="button" variant="secondary" onClick={() => setIsStudentDialogOpen(false)}>Cancel</Button>
                 <Button type="submit" disabled={isSaving}>
                   {isSaving ? (
@@ -448,8 +449,8 @@ export default function StudentsPage() {
                   ) : 'Save Student'}
                 </Button>
               </DialogFooter>
+            </form>
           </DialogContent>
-        </form>
       </Dialog>
       
        {/* View Details Dialog */}
@@ -615,7 +616,5 @@ export default function StudentsPage() {
     </div>
   );
 }
-
-    
 
     

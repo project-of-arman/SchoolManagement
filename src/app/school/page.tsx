@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { Users, ClipboardList, Wallet, UserCheck, Loader2 } from "lucide-react";
+import { Users, ClipboardList, Wallet, UserCheck, Loader2, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from 'next/link';
@@ -63,7 +63,7 @@ export default function DashboardPage() {
         description="Welcome back! Here's a snapshot of your school's activity."
       >
         <Button asChild>
-          <Link href="/school/applications/new">New Application <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          <Link href="/school/applications"><PlusCircle className="mr-2 h-4 w-4" />Create Application</Link>
         </Button>
       </PageHeader>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

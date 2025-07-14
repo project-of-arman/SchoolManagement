@@ -54,9 +54,11 @@ export default function SchoolLandingPage() {
         setLoading(false);
       }
     }
-
-    fetchSchoolData();
-  }, [params]);
+    
+    if (params.subdomain) {
+      fetchSchoolData();
+    }
+  }, [params.subdomain]);
 
   if (loading) {
     return (

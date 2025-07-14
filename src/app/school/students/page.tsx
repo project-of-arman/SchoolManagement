@@ -81,10 +81,10 @@ interface Student {
 
   guardianIs: 'father' | 'mother' | 'other';
   guardianName: string;
-  guardianRelation?: string;
-  guardianPhone?: string;
-  guardianOccupation?: string;
-  guardianAddress?: string;
+  guardianRelation: string;
+  guardianPhone: string;
+  guardianOccupation: string;
+  guardianAddress: string;
 
   status: "Active" | "Inactive";
 }
@@ -200,7 +200,7 @@ export default function StudentsPage() {
     try {
         const studentDoc = doc(db, "schools", currentUser.uid, "students", studentFormData.id);
         const { id, ...studentData } = studentFormData;
-        await updateDoc(studentDoc, studentData);
+        await updateDoc(studentDoc, studentData as any);
         toast({ title: "Success", description: "Student details updated." });
         setIsStudentDialogOpen(false);
         setStudentFormData(initialStudentState);
@@ -274,13 +274,15 @@ export default function StudentsPage() {
     setStudentFormData(prev => {
         const newFormData = {...prev, guardianIs: value};
         if (value === 'father') {
-            newFormData.guardianName = newFormData.fatherName;
-            newFormData.guardianPhone = newFormData.fatherPhone;
-            newFormData.guardianOccupation = newFormData.fatherOccupation;
+            newFormData.guardianName = prev.fatherName;
+            newFormData.guardianPhone = prev.fatherPhone;
+            newFormData.guardianOccupation = prev.fatherOccupation;
+            newFormData.guardianRelation = 'Father';
         } else if (value === 'mother') {
-            newFormData.guardianName = newFormData.motherName;
-            newFormData.guardianPhone = newFormData.motherPhone;
-            newFormData.guardianOccupation = newFormData.motherOccupation;
+            newFormData.guardianName = prev.motherName;
+            newFormData.guardianPhone = prev.motherPhone;
+            newFormData.guardianOccupation = prev.motherOccupation;
+            newFormData.guardianRelation = 'Mother';
         } else {
              newFormData.guardianName = '';
              newFormData.guardianPhone = '';
@@ -335,16 +337,16 @@ export default function StudentsPage() {
                           </div>
                            <div className="space-y-2 flex flex-col"><Label>Date of Birth</Label>
                               <Popover>
-                                  <PopoverTrigger asChild><Button variant={"outline"} className={cn("justify-start text-left font-normal", !studentFormData.dateOfBirth && "text-muted-foreground")}>{studentFormData.dateOfBirth ? format(studentFormData.dateOfBirth, "PPP") : (<span>Pick a date</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={studentFormData.dateOfBirth} onSelect={(d) => handleDateChange('dateOfBirth', d)} initialFocus /></PopoverContent>
+                                  <PopoverTrigger asChild><Button variant={"outline"} className={cn("justify-start text-left font-normal", !studentFormData.dateOfBirth && "text-muted-foreground")}>{studentFormData.dateOfBirth ? format(new Date(studentFormData.dateOfBirth), "PPP") : (<span>Pick a date</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={studentFormData.dateOfBirth ? new Date(studentFormData.dateOfBirth) : undefined} onSelect={(d) => handleDateChange('dateOfBirth', d)} initialFocus /></PopoverContent>
                               </Popover>
                           </div>
                           <div className="space-y-2"><Label>Religion</Label><Input id="religion" value={studentFormData.religion} onChange={handleInputChange} /></div>
                           <div className="space-y-2"><Label>Mobile Number</Label><Input id="mobileNumber" type="tel" value={studentFormData.mobileNumber} onChange={handleInputChange} /></div>
                            <div className="space-y-2 flex flex-col"><Label>Admission Date</Label>
                               <Popover>
-                                  <PopoverTrigger asChild><Button variant={"outline"} className={cn("justify-start text-left font-normal", !studentFormData.admissionDate && "text-muted-foreground")}>{studentFormData.admissionDate ? format(studentFormData.admissionDate, "PPP") : (<span>Pick a date</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={studentFormData.admissionDate} onSelect={(d) => handleDateChange('admissionDate', d)} initialFocus /></PopoverContent>
+                                  <PopoverTrigger asChild><Button variant={"outline"} className={cn("justify-start text-left font-normal", !studentFormData.admissionDate && "text-muted-foreground")}>{studentFormData.admissionDate ? format(new Date(studentFormData.admissionDate), "PPP") : (<span>Pick a date</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={studentFormData.admissionDate ? new Date(studentFormData.admissionDate) : undefined} onSelect={(d) => handleDateChange('admissionDate', d)} initialFocus /></PopoverContent>
                               </Popover>
                           </div>
                           <div className="space-y-2"><Label>Blood Group</Label><Input id="bloodGroup" value={studentFormData.bloodGroup} onChange={handleInputChange} /></div>
@@ -377,15 +379,15 @@ export default function StudentsPage() {
                              {studentFormData.guardianIs === 'other' && (
                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
                                       <div className="space-y-2"><Label>Guardian Name</Label><Input id="guardianName" value={studentFormData.guardianName} onChange={handleInputChange} /></div>
-                                      <div className="space-y-2"><Label>Guardian Relation</Label><Input id="guardianRelation" value={studentFormData.guardianRelation} onChange={handleInputChange} /></div>
-                                      <div className="space-y-2"><Label>Guardian Phone</Label><Input id="guardianPhone" value={studentFormData.guardianPhone} onChange={handleInputChange} /></div>
-                                      <div className="space-y-2"><Label>Guardian Occupation</Label><Input id="guardianOccupation" value={studentFormData.guardianOccupation} onChange={handleInputChange} /></div>
-                                      <div className="md:col-span-2 space-y-2"><Label>Guardian Address</Label><Textarea id="guardianAddress" value={studentFormData.guardianAddress} onChange={handleInputChange} /></div>
+                                      <div className="space-y-2"><Label>Guardian Relation</Label><Input id="guardianRelation" value={studentFormData.guardianRelation ?? ''} onChange={handleInputChange} /></div>
+                                      <div className="space-y-2"><Label>Guardian Phone</Label><Input id="guardianPhone" value={studentFormData.guardianPhone ?? ''} onChange={handleInputChange} /></div>
+                                      <div className="space-y-2"><Label>Guardian Occupation</Label><Input id="guardianOccupation" value={studentFormData.guardianOccupation ?? ''} onChange={handleInputChange} /></div>
+                                      <div className="md:col-span-2 space-y-2"><Label>Guardian Address</Label><Textarea id="guardianAddress" value={studentFormData.guardianAddress ?? ''} onChange={handleInputChange} /></div>
                                  </div>
                              )}
                              {studentFormData.guardianIs !== 'other' && (
                                  <div className="pt-4 border-t">
-                                   <div className="space-y-2"><Label>Guardian Address</Label><Textarea id="guardianAddress" value={studentFormData.guardianAddress} onChange={handleInputChange} /></div>
+                                   <div className="space-y-2"><Label>Guardian Address</Label><Textarea id="guardianAddress" value={studentFormData.guardianAddress ?? ''} onChange={handleInputChange} /></div>
                                  </div>
                              )}
                           </div>
@@ -482,3 +484,5 @@ export default function StudentsPage() {
     </div>
   );
 }
+
+    

@@ -12,7 +12,7 @@ type FileUploadProps = {
   id: string;
   label: string;
   accept?: string;
-  onUploadComplete: (url: string) => void;
+  onUploadComplete?: (url: string) => void;
   initialUrl?: string | null;
 };
 
@@ -47,6 +47,7 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
 
     // Start upload
     setIsUploading(true);
+    setUploadProgress(0);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -67,10 +68,13 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
             if (xhr.status === 200) {
                 const response = JSON.parse(xhr.responseText);
                 const secureUrl = response.secure_url;
-                onUploadComplete(secureUrl);
+                if(onUploadComplete) {
+                  onUploadComplete(secureUrl);
+                }
                 setPreviewUrl(secureUrl);
             } else {
                 console.error("Upload failed:", xhr.responseText);
+                setPreviewUrl(initialUrl || null); // Revert on failure
                 // TODO: Add toast notification for error
             }
             setIsUploading(false);
@@ -79,6 +83,7 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
         xhr.onerror = () => {
              console.error("Upload failed due to a network error.");
              setIsUploading(false);
+             setPreviewUrl(initialUrl || null); // Revert on failure
              // TODO: Add toast notification for error
         };
         
@@ -87,13 +92,16 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
     } catch (error) {
         console.error("Upload failed:", error);
         setIsUploading(false);
+        setPreviewUrl(initialUrl || null); // Revert on failure
         // TODO: Add toast notification for error
     }
   };
 
   const clearPreview = () => {
     setPreviewUrl(null);
-    onUploadComplete(""); // Notify parent component that the image is cleared
+    if (onUploadComplete) {
+        onUploadComplete(""); // Notify parent component that the image is cleared
+    }
   }
 
   return (

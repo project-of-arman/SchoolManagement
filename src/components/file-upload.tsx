@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { UploadCloud, Image as ImageIcon, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { UploadCloud, X } from "lucide-react";
 import { Label } from "./ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { storage } from "@/lib/firebase";
@@ -22,7 +22,12 @@ export function FileUpload({ id, label, accept = "image/*", onUploadComplete, in
   const { user } = useAuth();
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(initialUrl || null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPreviewUrl(initialUrl || null);
+  }, [initialUrl]);
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

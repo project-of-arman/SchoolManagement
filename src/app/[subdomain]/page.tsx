@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { CampusConnectLogo } from "@/components/icons";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,7 +19,8 @@ interface SchoolData {
   bannerUrl?: string;
 }
 
-export default function SchoolLandingPage({ params }: { params: { subdomain: string } }) {
+export default function SchoolLandingPage() {
+  const params = useParams();
   const [school, setSchool] = useState<SchoolData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
     setYear(new Date().getFullYear());
 
     async function fetchSchoolData() {
-      const { subdomain } = params;
+      const subdomain = params.subdomain as string;
       if (!subdomain) {
         setLoading(false);
         setError("No subdomain provided.");

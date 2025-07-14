@@ -9,6 +9,7 @@ import { CampusConnectLogo } from "@/components/icons";
 import { Card, CardContent } from "@/components/ui/card";
 import { School, Building, Globe, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { ClientOnly } from "@/components/client-only";
 
 interface SchoolData {
   id: string;
@@ -22,12 +23,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
   const [school, setSchool] = useState<SchoolData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentYear, setCurrentYear] = useState<number | null>(null);
-
-  useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
-  }, []);
-
+  
   useEffect(() => {
     async function fetchSchoolData() {
       // The parameter is now `schoolId` based on the file name [schoolId]/page.tsx
@@ -149,7 +145,7 @@ export default function SchoolLandingPage({ params }: { params: { subdomain: str
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-8">
         <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
           <p className="text-sm text-muted-foreground">
-            &copy; {currentYear} {school.name}. All rights reserved.
+            <ClientOnly>&copy; {new Date().getFullYear()} {school.name}. All rights reserved.</ClientOnly>
           </p>
            <p className="text-sm text-muted-foreground mt-4 md:mt-0">
             Powered by <Link href="/" className="font-semibold text-primary hover:underline">CampusConnect</Link>

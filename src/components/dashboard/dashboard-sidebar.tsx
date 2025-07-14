@@ -56,12 +56,12 @@ export function DashboardSidebar() {
 
 
   const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/applications", label: "Applications", icon: ClipboardList },
-    { href: "/dashboard/teachers", label: "Teachers", icon: Users },
-    { href: "/dashboard/payments", label: "Fee Payments", icon: Wallet },
-    { href: "/dashboard/results", label: "Results", icon: GraduationCap },
-    { href: "/dashboard/requests", label: "Certificates", icon: BookOpen },
+    { href: "/school", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/school/applications", label: "Applications", icon: ClipboardList },
+    { href: "/school/teachers", label: "Teachers", icon: Users },
+    { href: "/school/payments", label: "Fee Payments", icon: Wallet },
+    { href: "/school/results", label: "Results", icon: GraduationCap },
+    { href: "/school/requests", label: "Certificates", icon: BookOpen },
   ];
 
   const handleLogout = async () => {
@@ -94,7 +94,7 @@ export function DashboardSidebar() {
               <SidebarMenuButton
                   as={Link}
                   href={item.href}
-                  isActive={pathname === item.href}
+                  isActive={pathname === item.href || (item.href !== "/school" && pathname.startsWith(item.href))}
                   tooltip={item.label}
                 >
                   <item.icon />
@@ -107,7 +107,7 @@ export function DashboardSidebar() {
       <SidebarFooter>
         <SidebarSeparator />
          <SidebarMenuItem>
-            <SidebarMenuButton as={Link} href="/dashboard/settings" isActive={pathname === '/dashboard/settings'} tooltip="Settings">
+            <SidebarMenuButton as={Link} href="/school/settings" isActive={pathname === '/school/settings'} tooltip="Settings">
               <Settings />
               <span>Settings</span>
             </SidebarMenuButton>

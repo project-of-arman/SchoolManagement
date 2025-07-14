@@ -51,7 +51,7 @@ export function LoginForm() {
     return <div>Loading...</div>; // Or a spinner component
   }
   if (user) {
-    router.push('/dashboard');
+    router.push('/school');
     return null; // Or a loading indicator
   }
 
@@ -62,7 +62,7 @@ export function LoginForm() {
         title: "Login Successful",
         description: "Redirecting to your dashboard...",
       });
-      router.push("/dashboard");
+      router.push("/school");
     } catch (error: any) {
       console.error("Login failed", error);
       toast({
@@ -98,7 +98,7 @@ export function LoginForm() {
         title: "Login Successful",
         description: "Redirecting to your dashboard...",
       });
-      router.push("/dashboard");
+      router.push("/school");
     } catch (error: any) {
       console.error("Google sign-in failed", error);
       toast({

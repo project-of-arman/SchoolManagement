@@ -1,6 +1,6 @@
 
 import { collection, getDocs, query, where, limit } from "firebase/firestore";
-import { db, app as firebaseApp } from "@/lib/firebase"; // Import app to check initialization
+import { db } from "@/lib/firebase";
 import { NextResponse } from "next/server";
 import { getApps } from "firebase/app";
 
@@ -11,7 +11,9 @@ export async function GET(
   try {
     // Ensure Firebase is initialized
     if (!getApps().length) {
-      return NextResponse.json({ error: "Firebase not initialized" }, { status: 500 });
+       // This is a server-side check, app should be initialized by firebase.ts
+       // If not, it's a critical configuration error.
+      throw new Error("Firebase has not been initialized.");
     }
 
     const subdomain = params.subdomain;

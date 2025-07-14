@@ -32,8 +32,8 @@ export default function SchoolLandingPage() {
     async function fetchSchoolData() {
       const subdomain = params.subdomain as string;
       if (!subdomain) {
-        setLoading(false);
         setError("No subdomain provided.");
+        setLoading(false);
         return;
       };
 
@@ -72,7 +72,7 @@ export default function SchoolLandingPage() {
   if (error || !school) {
      return (
         <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
-            <PageHeader title="School Not Found" description="The school you are looking for does not exist or the URL is incorrect." />
+            <PageHeader title="School Not Found" description={error || "The school you are looking for does not exist or the URL is incorrect."} />
              <Button asChild>
                 <Link href="/">Go to Homepage</Link>
             </Button>
@@ -130,7 +130,7 @@ export default function SchoolLandingPage() {
             </p>
             <div className="mt-8 flex justify-center gap-4">
                 <Button size="lg" asChild>
-                    <Link href={`/${school.subdomain}/apply`}>Apply Now</Link>
+                    <Link href={`/school/applications`}>Apply Now</Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
                      <Link href="/login">School Login</Link>

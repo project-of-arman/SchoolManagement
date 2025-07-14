@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { FileUpload } from "@/components/file-upload";
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -45,7 +45,7 @@ export default function SettingsPage() {
                     if (schoolDoc.exists()) {
                         const data = schoolDoc.data();
                         setSchoolProfile({
-                            name: data.name || '',
+                            name: data.name || user.displayName || '',
                             subdomain: data.subdomain || '',
                         });
                         setPaymentDetails({
@@ -53,6 +53,9 @@ export default function SettingsPage() {
                             nagad: data.paymentDetails?.nagad || '',
                             rocket: data.paymentDetails?.rocket || '',
                         });
+                    } else {
+                        // Pre-fill with some data if doc doesn't exist
+                        setSchoolProfile({ name: user.displayName || 'My School', subdomain: '' });
                     }
                 } catch (error) {
                     console.error("Error fetching settings: ", error);
@@ -71,11 +74,9 @@ export default function SettingsPage() {
         setSavingProfile(true);
         try {
             const schoolDocRef = doc(db, "schools", user.uid);
-            await updateDoc(schoolDocRef, {
+            await setDoc(schoolDocRef, {
                 subdomain: schoolProfile.subdomain
-            });
-            // Note: In a real app, logo/banner would upload to Firebase Storage
-            // and we'd save the URL here. We are skipping that for now.
+            }, { merge: true });
             toast({ title: "Success", description: "Profile settings saved. (Image uploads not implemented)" });
         } catch (error) {
             console.error("Error saving profile: ", error);
@@ -91,7 +92,7 @@ export default function SettingsPage() {
         setSavingPayments(true);
         try {
             const schoolDocRef = doc(db, "schools", user.uid);
-            await updateDoc(schoolDocRef, { paymentDetails });
+            await setDoc(schoolDocRef, { paymentDetails }, { merge: true });
             toast({ title: "Success", description: "Payment information updated successfully." });
         } catch (error) {
             console.error("Error updating payment info: ", error);

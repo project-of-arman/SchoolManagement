@@ -44,18 +44,23 @@ export function ContentManagement({
     setError('')
 
     try {
+      // Normalize section name for database consistency
+      const dbSection = section === 'about-section' ? 'about' : section
+      
       const { error: updateError } = await supabase
         .from('school_content')
         .upsert({
           school_id: schoolId,
-          section,
+          section: dbSection,
           content: formData,
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'school_id,section'
         })
 
       if (updateError) throw updateError
 
-      onContentUpdate(section, formData)
+      onContentUpdate(dbSection, formData)
       setEditing(false)
     } catch (err: any) {
       setError(err.message || 'Failed to save content')
@@ -563,6 +568,7 @@ export function ContentManagement({
   const renderContent = () => {
     switch (section) {
       case 'about-section':
+      case 'about':
         return renderAboutSection()
       case 'gallery':
         return renderGallerySection()
@@ -571,7 +577,15 @@ export function ContentManagement({
       case 'featured-students':
         return renderFeaturedStudents()
       default:
-        return <div>Content section not found</div>
+        return (
+          <div className="text-center py-8 text-gray-500">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Edit className="h-8 w-8 text-gray-300" />
+            </div>
+            <p className="text-lg font-medium mb-2">Content Section Not Available</p>
+            <p className="text-sm">This content section is not yet implemented or configured.</p>
+          </div>
+        )
     }
   }
 

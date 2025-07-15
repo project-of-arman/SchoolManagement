@@ -6,9 +6,15 @@ import { HeroCarousel } from './ui/hero-carousel'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
+import { Alert, AlertDescription } from './ui/alert'
 import { MapPin, Users, Calendar, BookOpen, Award, Phone, Mail } from 'lucide-react'
+import { Search, GraduationCap, TrendingUp } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 interface SchoolLandingProps {
   school: {
@@ -23,8 +29,27 @@ interface SchoolLandingProps {
   }>
 }
 
+interface Result {
+  id: string
+  roll_number: string
+  class: string
+  subject: string
+  marks: number
+  total_marks: number
+  exam_type: string
+  grade: string
+  created_at: string
+}
 export function SchoolLanding({ school, content }: SchoolLandingProps) {
   const [activeSection, setActiveSection] = useState('home')
+  const [searchData, setSearchData] = useState({
+    rollNumber: '',
+    class: ''
+  })
+  const [searchResults, setSearchResults] = useState<Result[]>([])
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchError, setSearchError] = useState('')
+  const [showResults, setShowResults] = useState(false)
 
   const getContentBySection = (section: string) => {
     return content.find(c => c.section === section)?.content || {}
@@ -37,6 +62,57 @@ export function SchoolLanding({ school, content }: SchoolLandingProps) {
   const locationContent = getContentBySection('location')
   const noticesContent = getContentBySection('notices')
 
+  const handleResultSearch = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!searchData.rollNumber || !searchData.class) {
+      setSearchError('Please enter both roll number and class')
+      return
+    }
+
+    setSearchLoading(true)
+    setSearchError('')
+    setShowResults(false)
+
+    try {
+      const { data, error } = await supabase
+        .from('results')
+        .select('*')
+        .eq('school_id', school.id)
+        .eq('roll_number', searchData.rollNumber)
+        .eq('class', searchData.class)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      setSearchResults(data || [])
+      setShowResults(true)
+
+      if (!data || data.length === 0) {
+        setSearchError('No results found for the given roll number and class')
+      }
+    } catch (err: any) {
+      setSearchError(err.message || 'Failed to search results')
+    } finally {
+      setSearchLoading(false)
+    }
+  }
+
+  const calculatePercentage = (marks: number, totalMarks: number) => {
+    return ((marks / totalMarks) * 100).toFixed(1)
+  }
+
+  const getGradeColor = (grade: string) => {
+    switch (grade) {
+      case 'A+': return 'bg-green-100 text-green-800'
+      case 'A': return 'bg-green-100 text-green-700'
+      case 'A-': return 'bg-blue-100 text-blue-800'
+      case 'B': return 'bg-yellow-100 text-yellow-800'
+      case 'C': return 'bg-orange-100 text-orange-800'
+      case 'D': return 'bg-red-100 text-red-700'
+      case 'F': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
   useEffect(() => {
     const handleScroll = () => {
       const sections = ['home', 'about', 'gallery', 'students', 'location', 'notices']
@@ -67,6 +143,137 @@ export function SchoolLanding({ school, content }: SchoolLandingProps) {
         <HeroCarousel images={heroContent.images || []} />
       </section>
 
+      {/* Result Search Section */}
+      <section className="py-16 bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Check Your Results</h2>
+            <div className="w-24 h-1 bg-green-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Enter your roll number and class to view your exam results</p>
+          </div>
+          
+          <div className="max-w-2xl mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-center">
+                  <Search className="h-5 w-5 mr-2" />
+                  Result Search
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleResultSearch} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="rollNumber">Roll Number</Label>
+                      <Input
+                        id="rollNumber"
+                        type="text"
+                        value={searchData.rollNumber}
+                        onChange={(e) => setSearchData(prev => ({ ...prev, rollNumber: e.target.value }))}
+                        placeholder="Enter your roll number"
+                        required
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="class">Class</Label>
+                      <Input
+                        id="class"
+                        type="text"
+                        value={searchData.class}
+                        onChange={(e) => setSearchData(prev => ({ ...prev, class: e.target.value }))}
+                        placeholder="Enter your class (e.g., Class 10)"
+                        required
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button
+                    type="submit"
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    disabled={searchLoading}
+                  >
+                    {searchLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Searching...
+                      </>
+                    ) : (
+                      <>
+                        <Search className="h-4 w-4 mr-2" />
+                        Search Results
+                      </>
+                    )}
+                  </Button>
+                </form>
+                
+                {searchError && (
+                  <Alert variant="destructive" className="mt-4">
+                    <AlertDescription>{searchError}</AlertDescription>
+                  </Alert>
+                )}
+                
+                {showResults && searchResults.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center">
+                      <GraduationCap className="h-5 w-5 mr-2" />
+                      Results for Roll: {searchData.rollNumber}, Class: {searchData.class}
+                    </h3>
+                    
+                    <div className="space-y-3">
+                      {searchResults.map((result) => (
+                        <Card key={result.id} className="hover:shadow-md transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-center">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-3 mb-2">
+                                  <h4 className="font-semibold text-gray-900">{result.subject}</h4>
+                                  <Badge variant="outline">{result.exam_type}</Badge>
+                                  <Badge className={getGradeColor(result.grade)}>
+                                    {result.grade}
+                                  </Badge>
+                                </div>
+                                
+                                <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                  <span>Marks: {result.marks}/{result.total_marks}</span>
+                                  <span>Percentage: {calculatePercentage(result.marks, result.total_marks)}%</span>
+                                  <span>Date: {new Date(result.created_at).toLocaleDateString()}</span>
+                                </div>
+                              </div>
+                              
+                              <div className="text-right">
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {result.marks}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  out of {result.total_marks}
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                    
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                      <div className="flex items-center space-x-2 text-blue-800">
+                        <TrendingUp className="h-4 w-4" />
+                        <span className="font-semibold">Overall Performance</span>
+                      </div>
+                      <div className="mt-2 text-sm text-blue-700">
+                        Total Subjects: {searchResults.length} | 
+                        Average: {(searchResults.reduce((acc, result) => acc + (result.marks / result.total_marks * 100), 0) / searchResults.length).toFixed(1)}%
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
       {/* About Section */}
       <section id="about" className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

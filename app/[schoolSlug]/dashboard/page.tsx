@@ -142,7 +142,22 @@ export default function DashboardPage({ params }: { params: { schoolSlug: string
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b fixed top-0 right-0 left-0 z-10" style={{ left: sidebarCollapsed ? '64px' : '256px' }}>
+      <header className="bg-white shadow-sm border-b fixed top-0 right-0 z-10" style={{ left: sidebarCollapsed ? '64px' : '256px' }}>
+        <div className="md:hidden fixed top-0 left-0 right-0 bg-white shadow-sm border-b z-10">
+          <div className="flex items-center justify-between h-16 px-4">
+            <div className="ml-12">
+              <h1 className="text-lg font-bold text-gray-900 capitalize">
+                {activeSection.replace('-', ' ')} {activeSection === 'overview' ? 'Dashboard' : ''}
+              </h1>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Badge variant="outline" className="capitalize text-xs">
+                {userRole?.role?.replace('_', ' ')}
+              </Badge>
+            </div>
+          </div>
+        </div>
+      <div className="hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div>
@@ -168,6 +183,7 @@ export default function DashboardPage({ params }: { params: { schoolSlug: string
             </div>
           </div>
         </div>
+      </div>
       </header>
 
       {/* Sidebar */}
@@ -177,10 +193,12 @@ export default function DashboardPage({ params }: { params: { schoolSlug: string
         schoolName={school?.name || 'School'}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        schoolSlug={params.schoolSlug}
       />
 
       {/* Main Content */}
-      <div className="flex-1 pt-16" style={{ marginLeft: sidebarCollapsed ? '64px' : '256px' }}>
+      <div className="flex-1 pt-16 pb-20 md:pb-0" style={{ marginLeft: sidebarCollapsed ? '4px' : '3px' }}>
+        <div className="md:hidden pt-0" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {renderMainContent()}
         </div>

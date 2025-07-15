@@ -82,34 +82,29 @@ export function TeacherManagement({ schoolId, section }: TeacherManagementProps)
     setError('')
 
     try {
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: formData.email,
-        password: formData.password,
-        email_confirm: true,
-        user_metadata: {
+      // Call API route to create teacher
+      const response = await fetch('/api/teachers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
           full_name: formData.full_name,
           phone: formData.phone,
           subject: formData.subject,
           qualification: formData.qualification,
-          experience: formData.experience
-        }
-      })
-
-      if (authError) throw authError
-
-      // Create user record
-      const { error: userError } = await supabase
-        .from('users')
-        .insert({
-          id: authData.user.id,
-          email: formData.email,
-          full_name: formData.full_name,
-          role: 'teacher',
+          experience: formData.experience,
           school_id: schoolId
         })
+      })
 
-      if (userError) throw userError
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create teacher')
+      }
 
       // Reset form
       setFormData({
@@ -123,7 +118,9 @@ export function TeacherManagement({ schoolId, section }: TeacherManagementProps)
       })
 
       // Refresh teachers list
-      fetchTeachers()
+      if (section === 'teachers') {
+        fetchTeachers()
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to create teacher')
     } finally {
@@ -135,17 +132,16 @@ export function TeacherManagement({ schoolId, section }: TeacherManagementProps)
     if (!confirm('Are you sure you want to delete this teacher?')) return
 
     try {
-      // Delete from auth
-      const { error: authError } = await supabase.auth.admin.deleteUser(teacherId)
-      if (authError) throw authError
+      // Call API route to delete teacher
+      const response = await fetch(`/api/teachers?id=${teacherId}`, {
+        method: 'DELETE',
+      })
 
-      // Delete from users table
-      const { error: userError } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', teacherId)
+      const result = await response.json()
 
-      if (userError) throw userError
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete teacher')
+      }
 
       setTeachers(prev => prev.filter(t => t.id !== teacherId))
     } catch (err: any) {

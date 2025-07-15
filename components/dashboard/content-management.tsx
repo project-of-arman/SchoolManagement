@@ -538,7 +538,7 @@ export function ContentManagement({
                         alt={student.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.currentTarget.src = '/placeholder-student.jpg'
+                          e.currentTarget.src = 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg'
                         }}
                       />
                     </div>

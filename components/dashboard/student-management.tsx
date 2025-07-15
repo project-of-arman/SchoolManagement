@@ -11,7 +11,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { 
   GraduationCap, 
   UserPlus, 
-  Edit, 
+  Edit,
+  Eye, 
   Trash2, 
   Phone, 
   MapPin,
@@ -21,6 +22,8 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
+import { StudentDetails } from './student-details'
+import { StudentEdit } from './student-edit'
 
 interface Student {
   id: string
@@ -48,15 +51,18 @@ interface Student {
 
 interface StudentManagementProps {
   schoolId: string
-  section: 'students' | 'create-student'
+  section: 'students' | 'create-student' | 'student-details' | 'student-edit'
+  studentId?: string
 }
 
-export function StudentManagement({ schoolId, section }: StudentManagementProps) {
+export function StudentManagement({ schoolId, section, studentId }: StudentManagementProps) {
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterClass, setFilterClass] = useState('')
+  const [currentView, setCurrentView] = useState<'list' | 'details' | 'edit'>('list')
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   const { toast } = useToast()
   const [formData, setFormData] = useState({
     roll_number: '',
@@ -166,6 +172,28 @@ export function StudentManagement({ schoolId, section }: StudentManagementProps)
     }
   }
 
+  const handleViewStudent = (student: Student) => {
+    setSelectedStudent(student)
+    setCurrentView('details')
+  }
+
+  const handleEditStudent = (student: Student) => {
+    setSelectedStudent(student)
+    setCurrentView('edit')
+  }
+
+  const handleBackToList = () => {
+    setCurrentView('list')
+    setSelectedStudent(null)
+    fetchStudents() // Refresh the list
+  }
+
+  const handleStudentSaved = (updatedStudent: Student) => {
+    setStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s))
+    setSelectedStudent(updatedStudent)
+    setCurrentView('details')
+  }
+
   const handleDeleteStudent = async (studentId: string) => {
     if (!confirm('Are you sure you want to delete this student?')) return
 
@@ -196,6 +224,27 @@ export function StudentManagement({ schoolId, section }: StudentManagementProps)
   })
 
   const uniqueClasses = [...new Set(students.map(s => s.class))].filter(Boolean)
+
+  // Handle different views
+  if (section === 'students' && currentView === 'details' && selectedStudent) {
+    return (
+      <StudentDetails
+        studentId={selectedStudent.id}
+        onBack={handleBackToList}
+        onEdit={handleEditStudent}
+      />
+    )
+  }
+
+  if (section === 'students' && currentView === 'edit' && selectedStudent) {
+    return (
+      <StudentEdit
+        student={selectedStudent}
+        onBack={handleBackToList}
+        onSave={handleStudentSaved}
+      />
+    )
+  }
 
   if (section === 'create-student') {
     return (
@@ -601,7 +650,18 @@ export function StudentManagement({ schoolId, section }: StudentManagementProps)
                     </div>
 
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleViewStudent(student)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditStudent(student)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button

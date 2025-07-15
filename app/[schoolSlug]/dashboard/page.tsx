@@ -243,7 +243,7 @@ export default function DashboardPage({ params }: { params: { schoolSlug: string
         return (
           <ContentManagement
             schoolId={school?.id}
-            section="featured-students"
+            section="students"
             content={getContentBySection('students')}
             onContentUpdate={handleContentUpdate}
           />

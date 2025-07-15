@@ -20,6 +20,7 @@ import {
   Search
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useToast } from '@/hooks/use-toast'
 
 interface Student {
   id: string
@@ -56,6 +57,7 @@ export function StudentManagement({ schoolId, section }: StudentManagementProps)
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterClass, setFilterClass] = useState('')
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     roll_number: '',
     full_name: '',
@@ -113,9 +115,8 @@ export function StudentManagement({ schoolId, section }: StudentManagementProps)
         .select('id')
         .eq('school_id', schoolId)
         .eq('roll_number', formData.roll_number)
-        .single()
 
-      if (existingStudent) {
+      if (existingStudent && existingStudent.length > 0) {
         throw new Error('Roll number already exists')
       }
 
@@ -151,6 +152,11 @@ export function StudentManagement({ schoolId, section }: StudentManagementProps)
         status: 'active'
       })
 
+      toast({
+        title: "Student Created",
+        description: `${formData.full_name} has been successfully added to the system.`,
+      })
+
       // Refresh students list
       fetchStudents()
     } catch (err: any) {
@@ -172,6 +178,11 @@ export function StudentManagement({ schoolId, section }: StudentManagementProps)
       if (error) throw error
 
       setStudents(prev => prev.filter(s => s.id !== studentId))
+      
+      toast({
+        title: "Student Deleted",
+        description: "Student record has been successfully deleted.",
+      })
     } catch (err: any) {
       setError(err.message || 'Failed to delete student')
     }
@@ -506,7 +517,6 @@ export function StudentManagement({ schoolId, section }: StudentManagementProps)
                 <SelectValue placeholder="All Classes" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Classes</SelectItem>
                 {uniqueClasses.map(cls => (
                   <SelectItem key={cls} value={cls}>{cls}</SelectItem>
                 ))}

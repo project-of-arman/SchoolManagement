@@ -69,7 +69,8 @@ A comprehensive SaaS-based School Management System designed for Bangladeshi sch
 4. Configure Supabase:
    - Create a new Supabase project
    - Run the migration files in `supabase/migrations/`
-   - Add your Supabase URL and anon key to `.env.local`
+   - Add your Supabase URL, anon key, and service role key to `.env.local`
+   - Get your service role key from: Settings -> API -> Project API keys -> service_role key
 
 5. Configure Cloudinary:
    - Create a Cloudinary account

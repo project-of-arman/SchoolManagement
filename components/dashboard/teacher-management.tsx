@@ -19,6 +19,7 @@ import {
   X
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useToast } from '@/hooks/use-toast'
 
 interface Teacher {
   id: string
@@ -42,6 +43,7 @@ export function TeacherManagement({ schoolId, section }: TeacherManagementProps)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [editingTeacher, setEditingTeacher] = useState<string | null>(null)
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     email: '',
     full_name: '',
@@ -117,6 +119,11 @@ export function TeacherManagement({ schoolId, section }: TeacherManagementProps)
         password: ''
       })
 
+      toast({
+        title: "Teacher Created",
+        description: `${formData.full_name} has been successfully added as a teacher.`,
+      })
+
       // Refresh teachers list
       if (section === 'teachers') {
         fetchTeachers()
@@ -144,6 +151,11 @@ export function TeacherManagement({ schoolId, section }: TeacherManagementProps)
       }
 
       setTeachers(prev => prev.filter(t => t.id !== teacherId))
+      
+      toast({
+        title: "Teacher Deleted",
+        description: "Teacher account has been successfully deleted.",
+      })
     } catch (err: any) {
       setError(err.message || 'Failed to delete teacher')
     }

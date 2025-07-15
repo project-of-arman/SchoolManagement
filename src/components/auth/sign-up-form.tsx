@@ -59,7 +59,7 @@ export function SignUpForm() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.push("/school");
+      router.push("/school/dashboard");
     }
   }, [user, loading, router]);
 

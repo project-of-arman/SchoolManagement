@@ -63,7 +63,7 @@ export default function DashboardPage({ params }: { params: { schoolSlug: string
 
         // Fetch applications
         const { data: appsData } = await supabase
-          .from('applications')
+          .from('admission_applications')
           .select('*')
           .eq('school_id', role.school_id)
           .order('created_at', { ascending: false })
@@ -87,14 +87,14 @@ export default function DashboardPage({ params }: { params: { schoolSlug: string
 
   const updateApplicationStatus = async (applicationId: string, status: string) => {
     const { error } = await supabase
-      .from('applications')
-      .update({ status, updated_at: new Date().toISOString() })
+      .from('admission_applications')
+      .update({ application_status: status, updated_at: new Date().toISOString() })
       .eq('id', applicationId)
 
     if (!error) {
       setApplications(prev => 
         prev.map(app => 
-          app.id === applicationId ? { ...app, status } : app
+          app.id === applicationId ? { ...app, application_status: status } : app
         )
       )
     }
@@ -105,6 +105,7 @@ export default function DashboardPage({ params }: { params: { schoolSlug: string
       case 'approved': return 'bg-green-100 text-green-800'
       case 'rejected': return 'bg-red-100 text-red-800'
       case 'pending': return 'bg-yellow-100 text-yellow-800'
+      case 'under_review': return 'bg-blue-100 text-blue-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -309,7 +310,7 @@ export default function DashboardPage({ params }: { params: { schoolSlug: string
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {applications.filter(app => app.status === 'pending').length}
+                {applications.filter(app => app.application_status === 'pending').length}
               </div>
               <p className="text-xs text-muted-foreground">
                 Awaiting review
@@ -324,7 +325,7 @@ export default function DashboardPage({ params }: { params: { schoolSlug: string
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {applications.filter(app => app.status === 'approved').length}
+                {applications.filter(app => app.application_status === 'approved').length}
               </div>
               <p className="text-xs text-muted-foreground">
                 Successfully processed
@@ -357,29 +358,31 @@ export default function DashboardPage({ params }: { params: { schoolSlug: string
                 <div key={app.id} className="border rounded-lg p-4 hover:bg-gray-50">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h3 className="font-semibold">Roll: {app.roll_number}</h3>
+                      <h3 className="font-semibold">{app.full_name_english}</h3>
                       <p className="text-sm text-gray-600 capitalize">
-                        {app.application_type.replace('_', ' ')}
+                        Admission Application - {app.desired_class}
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Badge className={getStatusColor(app.status)}>
-                        {getStatusIcon(app.status)}
-                        <span className="ml-1 capitalize">{app.status}</span>
+                      <Badge className={getStatusColor(app.application_status)}>
+                        {getStatusIcon(app.application_status)}
+                        <span className="ml-1 capitalize">{app.application_status}</span>
                       </Badge>
                     </div>
                   </div>
                   
-                  {app.message && (
-                    <p className="text-sm text-gray-700 mb-3">{app.message}</p>
-                  )}
+                  <div className="text-sm text-gray-700 mb-3">
+                    <p>Father: {app.father_name}</p>
+                    <p>Phone: {app.father_phone}</p>
+                    <p>Religion: {app.religion}</p>
+                  </div>
                   
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-gray-500">
                       {new Date(app.created_at).toLocaleDateString()}
                     </span>
                     
-                    {app.status === 'pending' && (
+                    {app.application_status === 'pending' && (
                       <div className="flex space-x-2">
                         <Button
                           size="sm"

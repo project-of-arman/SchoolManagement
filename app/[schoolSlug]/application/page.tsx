@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FileText, ArrowLeft, CheckCircle } from 'lucide-react'
 import { getSchoolBySlug } from '@/lib/auth'
-import { AdmissionForm } from '@/components/admission-form'
+import { ComprehensiveAdmissionForm } from '@/components/comprehensive-admission-form'
 import Link from 'next/link'
 
 export default function ApplicationPage({ params }: { params: { schoolSlug: string } }) {
@@ -124,8 +124,7 @@ export default function ApplicationPage({ params }: { params: { schoolSlug: stri
             Apply for admission to {school.name}. No login required.
           </p>
         </div>
-
-        <AdmissionForm 
+<ComprehensiveAdmissionForm
           schoolId={school.id}
           schoolSlug={params.schoolSlug}
           onSuccess={handleSuccess}

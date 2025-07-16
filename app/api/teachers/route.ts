@@ -64,7 +64,11 @@ export async function POST(request: NextRequest) {
         email,
         full_name,
         role: 'teacher',
-        school_id
+        school_id,
+        subject,
+        phone,
+        qualification,
+        experience
       })
 
     if (userError) {

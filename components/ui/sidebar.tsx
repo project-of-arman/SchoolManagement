@@ -18,7 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   School,
-  BookOpen,
+  BookOpen,Plus,
   Award,
   Menu,
   X,
@@ -99,6 +99,18 @@ const menuItems = [
     id: 'results',
     label: 'Create Results',
     icon: BarChart3,
+    category: 'academic'
+  },
+  {
+    id: 'classes',
+    label: 'Manage Classes',
+    icon: BookOpen,
+    category: 'academic'
+  },
+  {
+    id: 'create-class',
+    label: 'Create Class',
+    icon: Plus,
     category: 'academic'
   },
   {

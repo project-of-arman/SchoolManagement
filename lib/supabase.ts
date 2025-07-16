@@ -105,10 +105,6 @@ export type Database = {
           role: string
           school_id: string
           full_name: string
-          subject?: string | null
-          phone?: string | null
-          qualification?: string | null
-          experience?: string | null
           created_at: string
           updated_at: string
         }
@@ -118,10 +114,6 @@ export type Database = {
           role: string
           school_id: string
           full_name: string
-          subject?: string | null
-          phone?: string | null
-          qualification?: string | null
-          experience?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -131,10 +123,6 @@ export type Database = {
           role?: string
           school_id?: string
           full_name?: string
-          subject?: string | null
-          phone?: string | null
-          qualification?: string | null
-          experience?: string | null
           created_at?: string
           updated_at?: string
         }

@@ -10,7 +10,6 @@ import { ContentManagement } from '@/components/dashboard/content-management'
 import { TeacherManagement } from '@/components/dashboard/teacher-management'
 import { StudentManagement } from '@/components/dashboard/student-management'
 import { ResultManagement } from '@/components/dashboard/result-management'
-import { ClassManagement } from '@/components/dashboard/class-management'
 import { SettingsManagement } from '@/components/dashboard/settings-management'
 import { 
   Users, 
@@ -259,10 +258,6 @@ export default function DashboardPage({ params }: { params: { schoolSlug: string
         return <StudentManagement schoolId={school?.id} section="create-student" />
       case 'results':
         return <ResultManagement schoolId={school?.id} />
-      case 'classes':
-        return <ClassManagement schoolId={school?.id} section="classes" />
-      case 'create-class':
-        return <ClassManagement schoolId={school?.id} section="create-class" />
       case 'exams':
         return (
           <Card>

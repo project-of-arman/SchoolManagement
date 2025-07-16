@@ -62,6 +62,13 @@ export function SchoolLanding({ school, content }: SchoolLandingProps) {
   const locationContent = getContentBySection('location')
   const noticesContent = getContentBySection('notices')
 
+  // Available class options
+  const classOptions = [
+    'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5',
+    'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10',
+    'Class 11', 'Class 12'
+  ]
+
   const handleResultSearch = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!searchData.rollNumber || !searchData.class) {
@@ -143,8 +150,12 @@ export function SchoolLanding({ school, content }: SchoolLandingProps) {
         <HeroCarousel images={heroContent.images || []} />
       </section>
 
-      {/* Result Search Section */}
-      <section className="py-16 bg-white border-b">
+     
+     
+            {/* Notices Section */}
+      <section id="notices" className="py-16 flex flex-col md:flex-row bg-white">
+         {/* Result Search Section */} 
+         <section className="py-16 bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Check Your Results</h2>
@@ -178,15 +189,21 @@ export function SchoolLanding({ school, content }: SchoolLandingProps) {
                     
                     <div>
                       <Label htmlFor="class">Class</Label>
-                      <Input
-                        id="class"
-                        type="text"
+                      <Select
                         value={searchData.class}
-                        onChange={(e) => setSearchData(prev => ({ ...prev, class: e.target.value }))}
-                        placeholder="Enter your class (e.g., Class 10)"
-                        required
-                        className="mt-1"
-                      />
+                        onValueChange={(value) => setSearchData(prev => ({ ...prev, class: value }))}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select your class" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {classOptions.map((classOption) => (
+                            <SelectItem key={classOption} value={classOption}>
+                              {classOption}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   
@@ -274,6 +291,33 @@ export function SchoolLanding({ school, content }: SchoolLandingProps) {
           </div>
         </div>
       </section>
+        <div className="max-w-7xl  mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center pt-16 mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Latest Notices</h2>
+            <div className="w-24 h-1 bg-green-600 mx-auto"></div>
+          </div>
+          
+          <div className="space-y-6">
+            {(noticesContent.items || []).map((notice: any, index: number) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">{notice.title}</CardTitle>
+                    <Badge variant="outline" className="flex items-center space-x-1">
+                      <Calendar className="h-3 w-3" />
+                      <span>{notice.date}</span>
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">{notice.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+      
       {/* About Section */}
       <section id="about" className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -458,34 +502,7 @@ export function SchoolLanding({ school, content }: SchoolLandingProps) {
         </div>
       </section>
 
-      {/* Notices Section */}
-      <section id="notices" className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Latest Notices</h2>
-            <div className="w-24 h-1 bg-green-600 mx-auto"></div>
-          </div>
-          
-          <div className="space-y-6">
-            {(noticesContent.items || []).map((notice: any, index: number) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{notice.title}</CardTitle>
-                    <Badge variant="outline" className="flex items-center space-x-1">
-                      <Calendar className="h-3 w-3" />
-                      <span>{notice.date}</span>
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">{notice.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
       {/* Call to Action */}
       <section className="py-16 bg-green-600">
